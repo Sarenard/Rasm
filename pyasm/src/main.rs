@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 use std::process::Command;
 use std::io::prelude::*;
 use std::fs::File;
+use std::env;
 
 macro_rules! command_enum {
     ($($variant:ident),*) => {
@@ -30,17 +31,26 @@ command_enum!(
     Sub, 
     While, 
     EndWhile, 
-    Gt
-    // Lt,
-    // Eq,
-    // Neq,
-    // Gte,
-    // Lte,
+    G,
+    L,
+    E,
+    Ne,
+    Ge,
+    Le
 );
 
 fn main() -> std::io::Result<()> {
 
-    make_asm().expect("failed to make asm");
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() < 2 {
+        println!("usage: pyasm -f <input file>");
+        return Ok(());
+    }
+
+    let input_file = &args[2];
+
+    make_asm(input_file).expect("failed to make asm");
 
     let _nasm_output = Command::new("nasm")
         .args(["-f", "elf64", "output/output.asm", "-o", "output/output.o"])
@@ -61,7 +71,7 @@ fn main() -> std::io::Result<()> {
     Ok(())
 }
 
-fn make_asm() -> std::io::Result<()> {
+fn make_asm(input_file: &str) -> std::io::Result<()> {
     let mut file = File::create("output/output.asm")?;
     let mut program = String::new();
     // start
@@ -104,7 +114,11 @@ fn make_asm() -> std::io::Result<()> {
     program.push_str("global _start\n");
     program.push_str("_start:\n");
 
-    let tokens = file_to_tok(include_str!("../input/input.pyasm"));
+    let mut input_file = File::open(input_file)?;
+    let mut contents = String::new();
+    input_file.read_to_string(&mut contents)?;
+
+    let tokens = file_to_tok(&contents.to_string());
     println!("tokens: {:?}", tokens);
     let commands = tok_to_commands(tokens);
     println!("commands: {:?}", commands);
@@ -176,25 +190,23 @@ fn make_asm() -> std::io::Result<()> {
                 program.push_str(args[0].as_str());
                 program.push_str("_end: ; end of the while clause\n\n");
             }
-            (Commands::Gt, args) => {
-                program.push_str("  ; gt\n");
-                program.push_str("  pop rdi\n");
-                program.push_str("  pop rax\n");
-                program.push_str("  cmp rax, rdi\n");
-                program.push_str("  jg gt_true_");
-                program.push_str(args[0].as_str());
-                program.push_str("\n");
-                program.push_str("  push 0\n");
-                program.push_str("  jmp gt_end_");
-                program.push_str(args[0].as_str());
-                program.push_str("\n");
-                program.push_str("gt_true_");
-                program.push_str(args[0].as_str());
-                program.push_str(":\n");
-                program.push_str("  push 1\n");
-                program.push_str("gt_end_");
-                program.push_str(args[0].as_str());
-                program.push_str(":\n\n");
+            (Commands::G, args) => {
+                program.push_str(&generate_comparison_code("g", &args[0].as_str()));
+            }
+            (Commands::L, args) => {
+                program.push_str(&generate_comparison_code("l", &args[0].as_str()));
+            }
+            (Commands::E, args) => {
+                program.push_str(&generate_comparison_code("e", &args[0].as_str()));
+            }
+            (Commands::Ne, args) => {
+                program.push_str(&generate_comparison_code("ne", &args[0].as_str()));
+            }
+            (Commands::Ge, args) => {
+                program.push_str(&generate_comparison_code("ge", &args[0].as_str()));
+            }
+            (Commands::Le, args) => {
+                program.push_str(&generate_comparison_code("le", &args[0].as_str()));
             }
         }
     }
@@ -253,24 +265,29 @@ fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
             unique_nb += 1;
         }
         else if token == ">" {
-            commands.push((Commands::Gt, [unique_nb.to_string()].to_vec()));
+            commands.push((Commands::G, [unique_nb.to_string()].to_vec()));
             unique_nb += 1;
         }
-        // else if token == "<" {
-        //     commands.push((Commands::Lt, [].to_vec()));
-        // }
-        // else if token == "==" {
-        //     commands.push((Commands::Eq, [].to_vec()));
-        // }
-        // else if token == "!=" {
-        //     commands.push((Commands::Neq, [].to_vec()));
-        // }
-        // else if token == ">=" {
-        //     commands.push((Commands::Gte, [].to_vec()));
-        // }
-        // else if token == "<=" {
-        //     commands.push((Commands::Lte, [].to_vec()));
-        // }
+        else if token == "<" {
+            commands.push((Commands::L, [unique_nb.to_string()].to_vec()));
+            unique_nb += 1;
+        }
+        else if token == "=" {
+            commands.push((Commands::E, [unique_nb.to_string()].to_vec()));
+            unique_nb += 1;
+        }
+        else if token == "!=" {
+            commands.push((Commands::Ne, [unique_nb.to_string()].to_vec()));
+            unique_nb += 1;
+        }
+        else if token == ">=" {
+            commands.push((Commands::Ge, [unique_nb.to_string()].to_vec()));
+            unique_nb += 1;
+        }
+        else if token == "<=" {
+            commands.push((Commands::Le, [unique_nb.to_string()].to_vec()));
+            unique_nb += 1;
+        }
         else {
             println!("Error : token: {}", token);
         }
@@ -296,3 +313,20 @@ fn file_to_tok(file: &str) -> Vec<String> {
     tokens.retain(|x| x != "");
     tokens
 }
+
+fn generate_comparison_code(operation: &str, args: &str) -> String {
+    let mut program = String::new();
+    program.push_str(format!("  ; {}\n", operation).as_str());
+    program.push_str("  pop rdi\n");
+    program.push_str("  pop rax\n");
+    program.push_str("  cmp rax, rdi\n");
+    program.push_str(format!("  j{} {}_true_{}\n", operation, operation, args).as_str());
+    program.push_str("  push 0\n");
+    program.push_str(format!("  jmp {}_end_{}\n", operation, args).as_str());
+    program.push_str(format!("{}_true_{}:\n", operation, args).as_str());
+    program.push_str("  push 1\n");
+    program.push_str(format!("{}_end_{}:\n\n", operation, args).as_str());
+
+    program
+}
+

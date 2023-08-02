@@ -1,10 +1,29 @@
-use std::fs::File;
-use std::io::prelude::*;
-
+use std::collections::VecDeque;
 use std::process::Command;
+use std::io::prelude::*;
+use std::fs::File;
+
+macro_rules! command_enum {
+    ($($variant:ident),*) => {
+        #[derive(Debug)]
+        enum Commands {
+            $($variant),*
+        }
+
+        impl std::fmt::Display for Commands {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                match self {
+                    $(Commands::$variant => write!(f, stringify!($variant))),*
+                }
+            }
+        }
+    };
+}
+
+command_enum!(Push, Dump, Add, Dup, If, EndIf);
 
 fn main() -> std::io::Result<()> {
-    
+
     make_asm().expect("failed to make asm");
 
     let _nasm_output = Command::new("nasm")
@@ -65,38 +84,104 @@ fn make_asm() -> std::io::Result<()> {
 
     let tokens = file_to_tok(include_str!("../input/input.pyasm"));
     println!("tokens: {:?}", tokens);
+    let commands = tok_to_commands(tokens);
+    println!("commands: {:?}", commands);
 
-    for token in tokens {
-        // si c'est un nombre
-        if token.chars().all(char::is_numeric) {
-            program.push_str("  push ");
-            program.push_str(token.as_str());
-            program.push_str("\n");
-        }
-        else if token == "." {
-            program.push_str("  pop rdi\n");
-            program.push_str("  call dump\n");
-        }
-        else if token == "+" {
-            program.push_str("  pop rdi\n");
-            program.push_str("  pop rax\n");
-            program.push_str("  add rax, rdi\n");
-            program.push_str("  push rax\n");
-        }
-        else {
-            println!("Error : token: {}", token);
+    for command in commands {
+        match (command.0, command.1) {
+            (Commands::Push, args) => {
+                program.push_str("  ; push ");
+                program.push_str(args[0].as_str());
+                program.push_str("\n  push ");
+                program.push_str(args[0].as_str());
+                program.push_str("\n\n");
+            },
+            (Commands::Dump, _) => {
+                program.push_str("  ; dump stack\n");
+                program.push_str("  pop rdi\n");
+                program.push_str("  call dump\n\n");
+            },
+            (Commands::Add, _) => {
+                program.push_str("  ; add\n");
+                program.push_str("  pop rdi\n");
+                program.push_str("  pop rax\n");
+                program.push_str("  add rax, rdi\n");
+                program.push_str("  push rax\n\n");
+            },
+            (Commands::Dup, _) => {
+                program.push_str("  ; dup\n");
+                program.push_str("  pop rax\n");
+                program.push_str("  push rax\n");
+                program.push_str("  push rax\n\n");
+            },
+            (Commands::If, args) => {
+                program.push_str("  ; if\n");
+                program.push_str("  pop rdi\n");
+                program.push_str("  cmp rdi, 0\n");
+                program.push_str("  je if_");
+                program.push_str(args[0].as_str());
+                program.push_str("_end\n\n");
+            },
+            (Commands::EndIf, args) => {
+                program.push_str("  if_");
+                program.push_str(args[0].as_str());
+                program.push_str("_end: ; end of the if\n\n");
+            },
         }
     }
     
     // exit
+    program.push_str("  ; we end the program and return 0\n");
     program.push_str("  mov eax, 1\n");
-    program.push_str("  mov ebx, 12\n");
+    program.push_str("  mov ebx, 0\n");
     program.push_str("  int 0x80\n");
     file.write_all(program.as_bytes())?;
     Ok(())
 }
 
+fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
+    let mut commands: Vec<(Commands, Vec<String>)> = Vec::new();
+    let mut unique_nb: u64 = 0;
+    let mut states: VecDeque<(Commands, u64)> = VecDeque::new();
+
+    for token in tokens {
+        if token == "end" {
+            match states.pop_back() {
+                Some((Commands::If, nb)) => {
+                    commands.push((Commands::EndIf, [nb.to_string()].to_vec()));
+                },
+                _ => {
+                    println!("Error : end");
+                }
+            }
+        }
+        else if token.chars().all(char::is_numeric) {
+            commands.push((Commands::Push, [token].to_vec()));
+        }
+        else if token == "." {
+            commands.push((Commands::Dump, [].to_vec()));
+        }
+        else if token == "+" {
+            commands.push((Commands::Add, [].to_vec()));
+        }
+        else if token == "dup" {
+            commands.push((Commands::Dup, [].to_vec()));
+        }
+        else if token == "if" {
+            commands.push((Commands::If, [unique_nb.to_string()].to_vec()));
+            states.push_back((Commands::If, unique_nb));
+            unique_nb += 1;
+        }
+        else {
+            println!("Error : token: {}", token);
+        }
+    }
+    commands
+}
+
 fn file_to_tok(file: &str) -> Vec<String> {
+    // replace \r from the file with nothing
+    let file = file.replace("\r", "");
     let mut tokens: Vec<String> = Vec::new();
     let mut token = String::new();
     for c in file.chars() {
@@ -108,5 +193,7 @@ fn file_to_tok(file: &str) -> Vec<String> {
         }
     }
     tokens.push(token.clone());
+    // remove empty tokens
+    tokens.retain(|x| x != "");
     tokens
 }

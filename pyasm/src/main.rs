@@ -7,6 +7,7 @@ use std::env;
 macro_rules! command_enum {
     ($($variant:ident),*) => {
         #[derive(Debug)]
+        #[derive(PartialEq)]
         enum Commands {
             $($variant),*
         }
@@ -36,7 +37,8 @@ command_enum!(
     E,
     Ne,
     Ge,
-    Le
+    Le,
+    PrintStringConst // temporary
 );
 
 fn main() -> std::io::Result<()> {
@@ -74,7 +76,31 @@ fn main() -> std::io::Result<()> {
 fn make_asm(input_file: &str) -> std::io::Result<()> {
     let mut file = File::create("output/output.asm")?;
     let mut program = String::new();
-    // start
+    
+    let mut input_file = File::open(input_file)?;
+    let mut contents = String::new();
+    input_file.read_to_string(&mut contents)?;
+
+    let tokens = file_to_tok(&contents.to_string());
+    #[cfg(debug_assertions)]
+    println!("tokens: {:?}", tokens);
+    
+    let commands = tok_to_commands(tokens);
+    #[cfg(debug_assertions)]
+    println!("commands: {:?}", commands);
+
+    // si jamais il y a au moins un PrintStringConst, on ajoute le .data
+    if commands.iter().any(|x| x.0 == Commands::PrintStringConst) {
+        program.push_str("section .data\n");
+    }
+    // on ajoute les constantes
+    commands.iter().for_each(|x| {
+        if x.0 == Commands::PrintStringConst {
+            program.push_str(format!("  msg{} db '{}', 0xa\n", x.1[1], cut_string(&x.1[0])).as_str());
+            program.push_str(format!("  msg{}len equ $ - msg{} \n", x.1[1], x.1[1]).as_str());
+        }
+    });
+
     program.push_str("section .text\n");
 
     program.push_str("dump:\n");
@@ -114,17 +140,6 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
     program.push_str("global _start\n");
     program.push_str("_start:\n");
 
-    let mut input_file = File::open(input_file)?;
-    let mut contents = String::new();
-    input_file.read_to_string(&mut contents)?;
-
-    let tokens = file_to_tok(&contents.to_string());
-    #[cfg(debug_assertions)]
-    println!("tokens: {:?}", tokens);
-    
-    let commands = tok_to_commands(tokens);
-    #[cfg(debug_assertions)]
-    println!("commands: {:?}", commands);
 
     for command in commands {
         match (command.0, command.1) {
@@ -219,6 +234,23 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
             }
             (Commands::Le, args) => {
                 program.push_str(&generate_comparison_code("le", &args[0].as_str()));
+            },
+            (Commands::PrintStringConst, args) => {
+                program.push_str(format!(
+                    "  ; print const message nb {}\n", 
+                    args[1].as_str()).as_str()
+                );
+                program.push_str("  mov rax, 1\n");
+                program.push_str("  mov rdi, 1\n");
+                program.push_str(format!(
+                    "  mov rsi, msg{}\n", 
+                    args[1].as_str()).as_str()
+                );
+                program.push_str(format!(
+                    "    mov rdx, msg{}len\n", 
+                    args[1].as_str()).as_str()
+                );
+                program.push_str("  syscall\n\n");
             }
         }
     }
@@ -235,6 +267,7 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
 fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
     let mut commands: Vec<(Commands, Vec<String>)> = Vec::new();
     let mut unique_nb: u64 = 0;
+    let mut mess_nb: u64 = 0;
     let mut states: VecDeque<(Commands, u64)> = VecDeque::new();
 
     for token in tokens {
@@ -300,6 +333,10 @@ fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
             commands.push((Commands::Le, [unique_nb.to_string()].to_vec()));
             unique_nb += 1;
         }
+        else if is_string(&token) {
+            commands.push((Commands::PrintStringConst, [token, format!("{}", mess_nb)].to_vec()));
+            mess_nb += 1;
+        }
         else {
             println!("Error : token: {}", token);
         }
@@ -308,20 +345,27 @@ fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
 }
 
 fn file_to_tok(file: &str) -> Vec<String> {
-    // replace \r from the file with nothing
     let file = file.replace("\r", "");
     let mut tokens: Vec<String> = Vec::new();
     let mut token = String::new();
+    let mut inside_string = false;
+
     for c in file.chars() {
-        if c == ' ' || c == '\n' {
+        if c == '\"' {
+            inside_string = !inside_string; // Toggle the inside_string flag
+            token.push(c);
+        } else if inside_string || (c != ' ' && c != '\n') {
+            token.push(c);
+        } else if !token.is_empty() {
             tokens.push(token.clone());
             token.clear();
-        } else {
-            token.push(c);
         }
     }
-    tokens.push(token.clone());
-    // remove empty tokens
+
+    if !token.is_empty() {
+        tokens.push(token.clone());
+    }
+
     tokens.retain(|x| x != "");
     tokens
 }
@@ -342,3 +386,18 @@ fn generate_comparison_code(operation: &str, args: &str) -> String {
     program
 }
 
+fn is_string(token: &str) -> bool {
+    if let Some(first_char) = token.chars().next() {
+        if let Some(last_char) = token.chars().rev().next() {
+            return first_char == '"' && last_char == '"';
+        }
+    }
+    false
+}
+
+fn cut_string(value: &str) -> &str {
+    let mut chars = value.chars();
+    chars.next();
+    chars.next_back();
+    chars.as_str()
+}

@@ -20,7 +20,23 @@ macro_rules! command_enum {
     };
 }
 
-command_enum!(Push, Dump, Add, Dup, If, EndIf);
+command_enum!(
+    Push, 
+    Dump, 
+    Add, 
+    Dup, 
+    If, 
+    EndIf, 
+    Sub, 
+    While, 
+    EndWhile, 
+    Gt
+    // Lt,
+    // Eq,
+    // Neq,
+    // Gte,
+    // Lte,
+);
 
 fn main() -> std::io::Result<()> {
 
@@ -114,6 +130,13 @@ fn make_asm() -> std::io::Result<()> {
                 program.push_str("  add rax, rdi\n");
                 program.push_str("  push rax\n\n");
             },
+            (Commands::Sub, _) => {
+                program.push_str("  ; sub\n");
+                program.push_str("  pop rax\n");
+                program.push_str("  pop rdi\n");
+                program.push_str("  sub rdi, rax\n");
+                program.push_str("  push rdi\n\n");
+            }
             (Commands::Dup, _) => {
                 program.push_str("  ; dup\n");
                 program.push_str("  pop rax\n");
@@ -133,6 +156,46 @@ fn make_asm() -> std::io::Result<()> {
                 program.push_str(args[0].as_str());
                 program.push_str("_end: ; end of the if\n\n");
             },
+            (Commands::While, args) => {
+                program.push_str("while_");
+                program.push_str(args[0].as_str());
+                program.push_str("_start: ; start of the while clause\n");
+                program.push_str("  ; while\n");
+                program.push_str("  pop rdi\n");
+                program.push_str("  cmp rdi, 0\n");
+                program.push_str("  je while_");
+                program.push_str(args[0].as_str());
+                program.push_str("_end\n\n");
+            },
+            (Commands::EndWhile, args) => {
+                program.push_str("  ; jump to while\n");
+                program.push_str("  jmp while_");
+                program.push_str(args[0].as_str());
+                program.push_str("_start\n");
+                program.push_str("while_");
+                program.push_str(args[0].as_str());
+                program.push_str("_end: ; end of the while clause\n\n");
+            }
+            (Commands::Gt, args) => {
+                program.push_str("  ; gt\n");
+                program.push_str("  pop rdi\n");
+                program.push_str("  pop rax\n");
+                program.push_str("  cmp rax, rdi\n");
+                program.push_str("  jg gt_true_");
+                program.push_str(args[0].as_str());
+                program.push_str("\n");
+                program.push_str("  push 0\n");
+                program.push_str("  jmp gt_end_");
+                program.push_str(args[0].as_str());
+                program.push_str("\n");
+                program.push_str("gt_true_");
+                program.push_str(args[0].as_str());
+                program.push_str(":\n");
+                program.push_str("  push 1\n");
+                program.push_str("gt_end_");
+                program.push_str(args[0].as_str());
+                program.push_str(":\n\n");
+            }
         }
     }
     
@@ -156,6 +219,9 @@ fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
                 Some((Commands::If, nb)) => {
                     commands.push((Commands::EndIf, [nb.to_string()].to_vec()));
                 },
+                Some((Commands::While, nb)) => {
+                    commands.push((Commands::EndWhile, [nb.to_string()].to_vec()));
+                },
                 _ => {
                     println!("Error : end");
                 }
@@ -170,6 +236,9 @@ fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
         else if token == "+" {
             commands.push((Commands::Add, [].to_vec()));
         }
+        else if token == "-" {
+            commands.push((Commands::Sub, [].to_vec()));
+        }
         else if token == "dup" {
             commands.push((Commands::Dup, [].to_vec()));
         }
@@ -178,6 +247,30 @@ fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
             states.push_back((Commands::If, unique_nb));
             unique_nb += 1;
         }
+        else if token == "while" {
+            commands.push((Commands::While, [unique_nb.to_string()].to_vec()));
+            states.push_back((Commands::While, unique_nb));
+            unique_nb += 1;
+        }
+        else if token == ">" {
+            commands.push((Commands::Gt, [unique_nb.to_string()].to_vec()));
+            unique_nb += 1;
+        }
+        // else if token == "<" {
+        //     commands.push((Commands::Lt, [].to_vec()));
+        // }
+        // else if token == "==" {
+        //     commands.push((Commands::Eq, [].to_vec()));
+        // }
+        // else if token == "!=" {
+        //     commands.push((Commands::Neq, [].to_vec()));
+        // }
+        // else if token == ">=" {
+        //     commands.push((Commands::Gte, [].to_vec()));
+        // }
+        // else if token == "<=" {
+        //     commands.push((Commands::Lte, [].to_vec()));
+        // }
         else {
             println!("Error : token: {}", token);
         }

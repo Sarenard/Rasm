@@ -89,11 +89,18 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
     #[cfg(debug_assertions)]
     println!("commands: {:?}", commands);
 
-    // si jamais il y a au moins un PrintStringConst, on ajoute le .data
-    if commands.iter().any(|x| x.0 == Commands::PrintStringConst) {
-        program.push_str("section .data\n");
-    }
-    // on ajoute les constantes
+    program.push_str("section .data\n");
+    program.push_str("  ; constants\n");
+    program.push_str("  NULL            equ 0\n");
+    program.push_str("  EXIT_SUCCESS    equ 0\n");
+    program.push_str("  EXIT_FAIL       equ 1\n");
+    program.push_str("  SYS_exit        equ 60\n");
+    program.push_str("  SYS_read        equ 0\n");
+    program.push_str("  SYS_write       equ 1\n");
+    program.push_str("  STD_in          equ 0\n");
+    program.push_str("  STD_out         equ 1\n\n");
+
+    // on ajoute les constantes de texte
     commands.iter().for_each(|x| {
         if x.0 == Commands::PrintStringConst {
             program.push_str(format!("  msg{} db '{}', 0xa\n", x.1[1], cut_string(&x.1[0])).as_str());
@@ -247,7 +254,7 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
                     args[1].as_str()).as_str()
                 );
                 program.push_str(format!(
-                    "    mov rdx, msg{}len\n", 
+                    "  mov rdx, msg{}len\n", 
                     args[1].as_str()).as_str()
                 );
                 program.push_str("  syscall\n\n");
@@ -257,9 +264,9 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
     
     // exit
     program.push_str("  ; we end the program and return 0\n");
-    program.push_str("  mov eax, 1\n");
-    program.push_str("  mov ebx, 0\n");
-    program.push_str("  int 0x80\n");
+    program.push_str("  mov rax, SYS_exit\n");
+    program.push_str("  mov rdi, EXIT_SUCCESS\n");
+    program.push_str("  syscall\n");
     file.write_all(program.as_bytes())?;
     Ok(())
 }

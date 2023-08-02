@@ -126,11 +126,14 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
     for command in commands {
         match (command.0, command.1) {
             (Commands::Push, args) => {
-                program.push_str("  ; push ");
-                program.push_str(args[0].as_str());
-                program.push_str("\n  push ");
-                program.push_str(args[0].as_str());
-                program.push_str("\n\n");
+                program.push_str(format!(
+                    "  ; push {}\n", 
+                    args[0].as_str()).as_str()
+                );
+                program.push_str(format!(
+                    "  push {}\n\n", 
+                    args[0].as_str()).as_str()
+                );
             },
             (Commands::Dump, _) => {
                 program.push_str("  ; dump stack\n");
@@ -161,34 +164,40 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
                 program.push_str("  ; if\n");
                 program.push_str("  pop rdi\n");
                 program.push_str("  cmp rdi, 0\n");
-                program.push_str("  je if_");
-                program.push_str(args[0].as_str());
-                program.push_str("_end\n\n");
+                program.push_str(format!(
+                    "  je if_{}_end\n\n", 
+                    args[0].as_str()).as_str()
+                );
             },
             (Commands::EndIf, args) => {
-                program.push_str("  if_");
-                program.push_str(args[0].as_str());
-                program.push_str("_end: ; end of the if\n\n");
+                program.push_str(format!(
+                    "  if_{}_end: ; end of the if\n\n", 
+                    args[0].as_str()).as_str()
+                );
             },
             (Commands::While, args) => {
-                program.push_str("while_");
-                program.push_str(args[0].as_str());
-                program.push_str("_start: ; start of the while clause\n");
+                program.push_str(format!(
+                    "  while_{}_start: ; start of the while clause\n", 
+                    args[0].as_str()).as_str()
+                );
                 program.push_str("  ; while\n");
                 program.push_str("  pop rdi\n");
                 program.push_str("  cmp rdi, 0\n");
-                program.push_str("  je while_");
-                program.push_str(args[0].as_str());
-                program.push_str("_end\n\n");
+                program.push_str(format!(
+                    "  je while_{}_end\n\n", 
+                    args[0].as_str()).as_str()
+                );
             },
             (Commands::EndWhile, args) => {
                 program.push_str("  ; jump to while\n");
-                program.push_str("  jmp while_");
-                program.push_str(args[0].as_str());
-                program.push_str("_start\n");
-                program.push_str("while_");
-                program.push_str(args[0].as_str());
-                program.push_str("_end: ; end of the while clause\n\n");
+                program.push_str(format!(
+                    "  jmp while_{}_start\n", 
+                    args[0].as_str()).as_str()
+                );
+                program.push_str(format!(
+                    "  while_{}_end ; end of the while\n\n", 
+                    args[0].as_str()).as_str()
+                );
             }
             (Commands::G, args) => {
                 program.push_str(&generate_comparison_code("g", &args[0].as_str()));
@@ -323,9 +332,9 @@ fn generate_comparison_code(operation: &str, args: &str) -> String {
     program.push_str(format!("  j{} {}_true_{}\n", operation, operation, args).as_str());
     program.push_str("  push 0\n");
     program.push_str(format!("  jmp {}_end_{}\n", operation, args).as_str());
-    program.push_str(format!("{}_true_{}:\n", operation, args).as_str());
+    program.push_str(format!("  {}_true_{}:\n", operation, args).as_str());
     program.push_str("  push 1\n");
-    program.push_str(format!("{}_end_{}:\n\n", operation, args).as_str());
+    program.push_str(format!("  {}_end_{}:\n\n", operation, args).as_str());
 
     program
 }

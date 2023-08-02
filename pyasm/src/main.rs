@@ -119,8 +119,11 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
     input_file.read_to_string(&mut contents)?;
 
     let tokens = file_to_tok(&contents.to_string());
+    #[cfg(debug_assertions)]
     println!("tokens: {:?}", tokens);
+    
     let commands = tok_to_commands(tokens);
+    #[cfg(debug_assertions)]
     println!("commands: {:?}", commands);
 
     for command in commands {

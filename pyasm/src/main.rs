@@ -30,12 +30,18 @@ fn main() -> std::io::Result<()> {
         .args(["-f", "elf64", "output/output.asm", "-o", "output/output.o"])
         .output()
         .expect("failed to execute process");
-    println!("nasm output: {:?}", _nasm_output);
+    if !_nasm_output.status.success() {
+        println!("nasm output: {:?}", _nasm_output);
+        return Ok(());
+    }
     let _ld_output = Command::new("ld")
         .args(["-m", "elf_x86_64", "output/output.o", "-o", "output/output"])
         .output()
         .expect("failed to execute process");
-    println!("ld output: {:?}", _ld_output);
+    if !_ld_output.status.success() {
+        println!("ld output: {:?}", _ld_output);
+        return Ok(());
+    }
     Ok(())
 }
 

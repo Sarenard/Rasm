@@ -4,32 +4,41 @@ Rasm est un language approximatif, codé en rust et qui se compile en assmbleur 
 
 Non, je ne connais ni le rust ni l'assembleur, mais oui je me lance la dedans, on verra bien  
 
-### Comment lancer rasm ?
+## Comment lancer rasm ?
+
 Pour compiler et lancer `input/input.pyasm`
+
 ```bash
 cargo build && ./target/debug/rasm -f input/input.pyasm && ./output/output
 ```
+
 Pour lancer les tests
+
 ```bash
 python3 test.py -t
 ```
+
 Pour enregistrer de nouveaux tests
+
 ```bash
 python3 test.py -r
 ```
+
 Pour juste compiler rasm
+
 ```bash
 cargo build --release
 ```
 
-## Objectifs long terme :
+## Objectifs long terme
+
 - [ ] Turing complet
 - [x] Accès mémoire correct
 - [ ] Self hosting
 - [ ] Type checking
 
+## Objectifs proches
 
-## Objectifs proches :
 - [ ] système d'erreurs
 - [ ] tests qui lancent rasm et non pas l'output
 - [ ] tests capable de gérer les erreurs
@@ -47,38 +56,65 @@ cargo build --release
 - [x] Syscall => push eax/rax
 - [x] Over
 - [x] Rot
+- [x] Mémoire 8/16/32/64 bits
 
 ## Syntaxe
-#### Découpage
-La syntaxe sera découpée en trois morceaux : 
+
+### Découpage
+
+La syntaxe sera découpée en trois morceaux :
+
 - L'explication de la commande
 - Un cas d'utilisation dans pyasm
 - Un équivalent en python
 
 ### `<int>`
+
 Push le nombre donné sur la stack
+
 ```dart
 3
 ```
+
 ```py
 stack.push(3)
 ```
+
 ### `.`
+
 Affiche le nombre sur la stack en décimal
+
 ```dart
 3 .
 ```
+
 ```py
 stack.push(3)
 print(stack.pop())
 ```
+
 ### `+`
+
 Additionne les deux éléments sur la stack et push le résultat
+
 ```dart
 3 3 +
 ```
+
 ```py
 stack.push(stack.pop() + stack.pop())
+```
+
+### `*`
+
+Multiplie les deux éléments sur la stack et push le résultat
+
+```dart
+3 3 *
+```
+
+```py
+stack.push(stack.pop() * stack.pop())
 ```
 
 ## Inspirations et remerciments

@@ -231,7 +231,8 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                     program.push_str(str);
                     program.push_str("\n");
                 }
-                program.push_str("  syscall\n\n");
+                program.push_str("  syscall\n");
+                program.push_str("  push rax\n\n");
             },
             (Commands::Mul, _) => {
                 program.push_str("  ; mul\n");

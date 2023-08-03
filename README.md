@@ -3,17 +3,12 @@
 Rasm est un language approximatif, codé en rust et qui se compile en assmbleur x86_64.
 
 Non, je ne connais ni le rust ni l'assembleur, mais oui je me lance la dedans, on verra bien
-
 Inspiré de <https://gitlab.com/tsoding/porth>
 
-## Syntaxe
-`<int>` : push le nombre sur la stack
-`.`     : pop la stack et affiche le nombre
-`+`     : pop les deux derniers nombres de la stack, les additionne et push le résultat
 
 ## Objectifs long terme :
 - [ ] Turing complet
-- [ ] Accès mémoire correct
+- [x] Accès mémoire correct
 - [ ] Self hosting
 - [ ] Type checking
 
@@ -28,6 +23,40 @@ Inspiré de <https://gitlab.com/tsoding/porth>
 - [x] mode compilé
 - [ ] mode debug
 - [x] syscalls
-- [ ] allocate memory
+- [x] système de mémoire
 - [ ] stdlib (refaire celle du C?)
-- [ ] découper rasm en plusieurs fichiers
+- [x] découper rasm en plusieurs fichiers
+- [ ] Détailler plus la syntaxe
+
+## Syntaxe
+#### Découpage
+La syntaxe sera découpée en trois morceaux : 
+- L'explication de la commande
+- Un cas d'utilisation dans pyasm
+- Un équivalent en python
+
+### `<int>`
+Push le nombre donné sur la stack
+```dart
+3
+```
+```py
+stack.push(3)
+```
+### `.`
+Affiche le nombre sur la stack en décimal
+```dart
+3 .
+```
+```py
+stack.push(3)
+print(stack.pop())
+```
+### `+`
+Additionne les deux éléments sur la stack et push le résultat
+```dart
+3 3 +
+```
+```py
+stack.push(stack.pop() + stack.pop())
+```

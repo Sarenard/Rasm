@@ -30,3 +30,4 @@ Inspiré de <https://gitlab.com/tsoding/porth>
 - [x] syscalls
 - [ ] allocate memory
 - [ ] stdlib (refaire celle du C?)
+- [ ] découper rasm en plusieurs fichiers

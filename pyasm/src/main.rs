@@ -110,6 +110,7 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
     program.push_str("  SYS_write       equ 1\n");
     program.push_str("  STD_in          equ 0\n");
     program.push_str("  STD_out         equ 1\n\n");
+    program.push_str("  STD_err         equ 2\n\n");
 
     // on ajoute les constantes de texte
     commands.iter().for_each(|x| {
@@ -259,7 +260,7 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
                     args[1].as_str()).as_str()
                 );
                 program.push_str("  mov rax, 1\n");
-                program.push_str("  mov rdi, 1\n");
+                program.push_str("  mov rdi, STD_out\n");
                 program.push_str(format!(
                     "  mov rsi, msg{}\n", 
                     args[1].as_str()).as_str()

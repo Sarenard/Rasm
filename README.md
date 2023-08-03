@@ -43,7 +43,7 @@ cargo build --release
 - [ ] stdlib (refaire celle du C?)
 - [x] découper rasm en plusieurs fichiers
 - [ ] Détailler plus la syntaxe dans le readme
-- [ ] Ignorer les commentaires
+- [x] Ignorer les commentaires
 - [x] Syscall => push eax/rax
 - [x] Over
 - [x] Rot

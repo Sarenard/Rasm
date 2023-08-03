@@ -72,6 +72,7 @@ fn main() -> std::io::Result<()> {
         println!("ld output: {:?}", ld_output);
         return Ok(());
     }
+
     Ok(())
 }
 

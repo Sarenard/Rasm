@@ -17,7 +17,16 @@ Inspiré de <https://gitlab.com/tsoding/porth>
 - [ ] Self hosting
 - [ ] Type checking
 
-## Objectifs autres
-- [ ] mode interprété et compilé
+
+## Objectifs proches :
+- [ ] système d'erreurs
+- [ ] tests qui lancent rasm et non pas l'output
+- [ ] tests capable de gérer les erreurs
+- [x] macros
+- [ ] includes de fichiers
+- [ ] mode interprété
+- [x] mode compilé
 - [ ] mode debug
-- [ ] lexer
+- [x] syscalls
+- [ ] allocate memory
+- [ ] stdlib (refaire celle du C?)

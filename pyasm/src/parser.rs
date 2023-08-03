@@ -77,7 +77,6 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
             commands.push((Commands::PrintStringConst, [token, format!("{}", mess_nb)].to_vec()));
             mess_nb += 1;
         }
-        // si le string commence par syscall
         else if token.starts_with("syscall") {
             // on récupère le nombre après syscall
             let nb = token.chars().skip(7).collect::<String>();
@@ -98,11 +97,29 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
         else if token == "mem" {
             commands.push((Commands::Mem, vec![]));
         }
-        else if token == "read8" {
-            commands.push((Commands::Read8, vec![]));
+        else if token.starts_with("read") {
+            let nb = token.chars().skip(4).collect::<String>();
+            // on vérifie que c'est bien un nombre
+            if nb.chars().all(char::is_numeric) {
+                // on convertit le nombre en u64
+                let nb = nb.parse::<u64>().unwrap();
+                commands.push((Commands::Read, [nb.to_string()].to_vec()));
+            }
+            else {
+                println!("Error : syscall invoqued without a number");
+            }
         }
-        else if token == "write8" {
-            commands.push((Commands::Write8, vec![]));
+        else if token.starts_with("write") {
+            let nb = token.chars().skip(5).collect::<String>();
+            // on vérifie que c'est bien un nombre
+            if nb.chars().all(char::is_numeric) {
+                // on convertit le nombre en u64
+                let nb = nb.parse::<u64>().unwrap();
+                commands.push((Commands::Write, [nb.to_string()].to_vec()));
+            }
+            else {
+                println!("Error : syscall invoqued without a number");
+            }
         }
         else if token == "swap" {
             commands.push((Commands::Swap, vec![]));
@@ -207,13 +224,13 @@ pub fn parse_includes(tokens: Vec<String>) -> Vec<String> {
     let mut in_include: bool = false;
 
     for token in tokens {
-        if token.starts_with("#include") {
+        if token.starts_with("include") {
             in_include = true;
         }
         if !in_include {
             new_tokens.push(token.clone());
         }
-        else if !token.starts_with("#include") {
+        else if !token.starts_with("include") {
             let mut file = File::open(token).unwrap();
             let mut content = String::new();
             file.read_to_string(&mut content).unwrap();

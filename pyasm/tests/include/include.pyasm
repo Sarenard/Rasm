@@ -1,4 +1,4 @@
-#include std/std.pyasm
+include std/std.pyasm
 
 
 3 print

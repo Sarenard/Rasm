@@ -1,4 +1,4 @@
-#include std/std.pyasm
+include std/std.pyasm
 
 macro OPEN swap drop 438 66 rot rot Sys_open syscall3 end
 
@@ -8,4 +8,4 @@ mem
 Sys_read
 syscall3
 
-174 mem write
+174 mem tprint

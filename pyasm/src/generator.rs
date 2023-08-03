@@ -250,18 +250,36 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 program.push_str("  ; mem\n");
                 program.push_str("  push mem\n\n");
             },
-            (Commands::Read8, _) => {
-                program.push_str("  ; read8\n");
+            (Commands::Read, args) => {
+                program.push_str(format!(
+                    "  ; read{}\n", 
+                    args[0].as_str()).as_str()
+                );
                 program.push_str("  pop rax\n");
                 program.push_str("  xor rbx, rbx ; clean rxb\n");
-                program.push_str("  mov bl, BYTE [rax]\n");
+                match args[0].as_str() {
+                    "8"  => {program.push_str("  mov bl, BYTE [rax]\n");},
+                    "16" => {program.push_str("  mov bx, WORD [rax]\n");},
+                    "32" => {program.push_str("  mov ebx, DOUBLEWORD [rax]\n");},
+                    "64" => {program.push_str("  mov rbx, QUADWORD [rax]\n");},
+                    _ => { panic!("Wrong size for read"); },
+                }
                 program.push_str("  push rbx\n\n");
             },
-            (Commands::Write8, _) => {
-                program.push_str("  ; write8\n");
+            (Commands::Write, args) => {
+                program.push_str(format!(
+                    "  ; write{}\n", 
+                    args[0].as_str()).as_str()
+                );
                 program.push_str("  pop rbx\n");
                 program.push_str("  pop rax\n");
-                program.push_str("  mov [rax], bl\n\n");
+                match args[0].as_str() {
+                    "8"  => {program.push_str("  mov BYTE [rax], bl\n\n");},
+                    "16" => {program.push_str("  mov WORD [rax], bx\n\n");},
+                    "32" => {program.push_str("  mov DOUBLEWORD [rax], ebx\n\n");},
+                    "64" => {program.push_str("  mov QUADWORD [rax], rbx\n\n");},
+                    _ => { panic!("Wrong size for write"); },
+                }
             },
             (Commands::Swap, _) => {
                 program.push_str("  ; swap\n");

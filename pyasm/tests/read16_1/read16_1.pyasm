@@ -1,0 +1,4 @@
+include std/std.pyasm
+
+mem 0 + 255 1 + write16
+mem 0 + read16 .

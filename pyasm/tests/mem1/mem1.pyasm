@@ -1,4 +1,4 @@
-mem 0 + 0 store8
-mem 1 + 1 store8
-mem 2 + 2 store8
+mem 0 + 0 write8
+mem 1 + 1 write8
+mem 2 + 2 write8
 mem 1 + read8 .

@@ -100,8 +100,11 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
         else if token == "read8" {
             commands.push((Commands::Read8, vec![]));
         }
-        else if token == "store8" {
-            commands.push((Commands::Store8, vec![]));
+        else if token == "write8" {
+            commands.push((Commands::Write8, vec![]));
+        }
+        else if token == "swap" {
+            commands.push((Commands::Swap, vec![]));
         }
         else {
             println!("Error : token: {}", token);

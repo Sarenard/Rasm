@@ -41,7 +41,7 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
     program.push_str("  SYS_read        equ 0\n");
     program.push_str("  SYS_write       equ 1\n");
     program.push_str("  STD_in          equ 0\n");
-    program.push_str("  STD_out         equ 1\n\n");
+    program.push_str("  STD_out         equ 1\n");
     program.push_str("  STD_err         equ 2\n\n");
 
     // on ajoute les constantes de texte
@@ -251,11 +251,18 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 program.push_str("  mov bl, BYTE [rax]\n");
                 program.push_str("  push rbx\n\n");
             },
-            (Commands::Store8, _) => {
-                program.push_str("  ; store8\n");
+            (Commands::Write8, _) => {
+                program.push_str("  ; write8\n");
                 program.push_str("  pop rbx\n");
                 program.push_str("  pop rax\n");
                 program.push_str("  mov [rax], bl\n\n");
+            },
+            (Commands::Swap, _) => {
+                program.push_str("  ; swap\n");
+                program.push_str("  pop rax\n");
+                program.push_str("  pop rdi\n");
+                program.push_str("  push rax\n");
+                program.push_str("  push rdi\n\n");
             }
         }
     }

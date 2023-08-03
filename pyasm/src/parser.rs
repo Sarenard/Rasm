@@ -114,9 +114,8 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
     commands
 }
 
-pub fn parse_macros(tokens: Vec<String>) -> Vec<String> {
+pub fn parse_macros(tokens: Vec<String>, mut macros: HashMap<String, Vec<String>>) -> Vec<String> {
     let mut new_tokens: Vec<String> = Vec::new();
-    let mut macros: HashMap<String, Vec<String>> = HashMap::new();
     let mut current: Vec<String> = Vec::new();
     let mut end_counter = 0;
     let mut in_macro: bool = false;
@@ -152,6 +151,8 @@ pub fn parse_macros(tokens: Vec<String>) -> Vec<String> {
         }
     }
 
+    println!("{:?}", macros);
+
     let mut true_tokens: Vec<String> = Vec::new();
 
     // we remove the macro definitions
@@ -175,6 +176,19 @@ pub fn parse_macros(tokens: Vec<String>) -> Vec<String> {
                 end_counter -= 1;
             }
         }
+    }
+
+    let mut not_used: bool = false;
+    for macro_name in macros.keys() {
+        if true_tokens.contains(macro_name) {
+            not_used = true;
+        }
+    }
+
+    if not_used {
+        println!("{:?}", true_tokens);
+        true_tokens = parse_macros(true_tokens, macros);
+        println!("{:?}", true_tokens);
     }
 
     true_tokens

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::io::Write;
@@ -28,7 +29,7 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
     println!("after includes: {:?}", includes_tokens);
 
     // we parse the macros
-    let macros_tokens = parser::parse_macros(includes_tokens);
+    let macros_tokens = parser::parse_macros(includes_tokens, HashMap::new());
     #[cfg(debug_assertions)]
     println!("after macros: {:?}", macros_tokens);
 

@@ -1,0 +1,15 @@
+#include std/std.pyasm
+
+200
+mem
+
+438
+66
+"input/examples/Print_himself.pyasm" swap drop 
+Sys_open
+syscall3
+
+Sys_read
+syscall3
+
+200 mem write

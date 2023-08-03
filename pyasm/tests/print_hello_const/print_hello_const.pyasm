@@ -1,1 +1,3 @@
-"Hello World !"
+#include std/std.pyasm
+
+"Hello World !" write

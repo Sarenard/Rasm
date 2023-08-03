@@ -45,7 +45,9 @@ command_enum!(
     Mem,
     Read8,
     Write8,
-    Swap
+    Swap,
+    Drop,
+    Over
 );
 
 fn main() -> std::io::Result<()> {

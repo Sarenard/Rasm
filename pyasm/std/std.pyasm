@@ -1,8 +1,22 @@
 macro print dup . end
 
+macro 2dup over over end
+
+macro write STD_out Sys_write syscall3D end
+
+macro EXIT Sys_exit syscall1D end
+
+macro syscall0D syscall0 drop end
+macro syscall1D syscall1 drop end
+macro syscall2D syscall2 drop end
+macro syscall3D syscall3 drop end
+macro syscall4D syscall4 drop end
+macro syscall5D syscall5 drop end
+macro syscall6D syscall6 drop end
+
 macro STD_in  0 end
 macro STD_out 1 end
-macro STD_err 2 end      
+macro STD_err 2 end
          
 macro Sys_read                     0 end
 macro Sys_write                    1 end

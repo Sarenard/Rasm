@@ -53,7 +53,7 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
     // on ajoute les constantes de texte
     commands.iter().for_each(|x| {
         if x.0 == Commands::PrintStringConst {
-            program.push_str(format!("  msg{} db '{}', 0xa\n", x.1[1], parser::cut_string(&x.1[0])).as_str());
+            program.push_str(format!("  msg{} db '{}', 0\n", x.1[1], (parser::cut_string(&x.1[0]))).replace("\\n", "', 10, '").as_str());
             program.push_str(format!("  msg{}len equ $ - msg{} \n", x.1[1], x.1[1]).as_str());
         }
     });
@@ -201,20 +201,19 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
             },
             (Commands::PrintStringConst, args) => {
                 program.push_str(format!(
-                    "  ; print const message nb {}\n", 
-                    args[1].as_str()).as_str()
-                );
-                program.push_str("  mov rax, 1\n");
-                program.push_str("  mov rdi, STD_out\n");
-                program.push_str(format!(
-                    "  mov rsi, msg{}\n", 
+                    "  ; put the *msg {} and the len on the stack\n", 
                     args[1].as_str()).as_str()
                 );
                 program.push_str(format!(
-                    "  mov rdx, msg{}len\n", 
+                    "  mov rax, msg{}len\n", 
                     args[1].as_str()).as_str()
                 );
-                program.push_str("  syscall\n\n");
+                program.push_str("  push rax\n\n");
+                program.push_str(format!(
+                    "  mov rax, msg{}\n", 
+                    args[1].as_str()).as_str()
+                );
+                program.push_str("  push rax\n");
             },
             #[allow(unreachable_code)] // pour que la macro marche
             (Commands::Syscall, args) => {
@@ -268,6 +267,18 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 program.push_str("  ; swap\n");
                 program.push_str("  pop rax\n");
                 program.push_str("  pop rdi\n");
+                program.push_str("  push rax\n");
+                program.push_str("  push rdi\n\n");
+            },
+            (Commands::Drop, _) => {
+                program.push_str("  ; drop\n");
+                program.push_str("  pop rax\n\n");
+            },
+            (Commands::Over, _) => {
+                program.push_str("  ; over\n");
+                program.push_str("  pop rax\n");
+                program.push_str("  pop rdi\n");
+                program.push_str("  push rdi\n");
                 program.push_str("  push rax\n");
                 program.push_str("  push rdi\n\n");
             }

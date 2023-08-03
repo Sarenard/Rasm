@@ -107,6 +107,12 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
         else if token == "swap" {
             commands.push((Commands::Swap, vec![]));
         }
+        else if token == "drop" {
+            commands.push((Commands::Drop, vec![]));
+        }
+        else if token == "over" {
+            commands.push((Commands::Over, vec![]));
+        }
         else {
             println!("Error : token: {}", token);
         }
@@ -151,6 +157,7 @@ pub fn parse_macros(tokens: Vec<String>, mut macros: HashMap<String, Vec<String>
         }
     }
 
+    #[cfg(debug_assertions)]
     println!("{:?}", macros);
 
     let mut true_tokens: Vec<String> = Vec::new();
@@ -186,9 +193,7 @@ pub fn parse_macros(tokens: Vec<String>, mut macros: HashMap<String, Vec<String>
     }
 
     if not_used {
-        println!("{:?}", true_tokens);
         true_tokens = parse_macros(true_tokens, macros);
-        println!("{:?}", true_tokens);
     }
 
     true_tokens

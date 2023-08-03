@@ -34,7 +34,7 @@ cargo build --release
 - [ ] tests qui lancent rasm et non pas l'output
 - [ ] tests capable de gérer les erreurs
 - [x] macros
-- [ ] includes de fichiers
+- [x] includes de fichiers
 - [ ] mode interprété
 - [x] mode compilé
 - [ ] mode debug

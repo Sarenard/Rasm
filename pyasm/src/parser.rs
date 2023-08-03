@@ -1,6 +1,7 @@
-use std::collections::{HashMap, VecDeque};
+use std::{collections::{HashMap, VecDeque}, fs::File, io::Read};
 
 use crate::Commands;
+use crate::lexer;
 
 
 pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
@@ -177,6 +178,32 @@ pub fn parse_macros(tokens: Vec<String>) -> Vec<String> {
     }
 
     true_tokens
+}
+
+pub fn parse_includes(tokens: Vec<String>) -> Vec<String> {
+    let mut new_tokens: Vec<String> = Vec::new();
+    let mut in_include: bool = false;
+
+    for token in tokens {
+        if token.starts_with("#include") {
+            in_include = true;
+        }
+        if !in_include {
+            new_tokens.push(token.clone());
+        }
+        else if !token.starts_with("#include") {
+            let mut file = File::open(token).unwrap();
+            let mut content = String::new();
+            file.read_to_string(&mut content).unwrap();
+            let new_content = parse_includes(lexer::file_to_tok(&content));
+            for tok in new_content.clone() {
+                new_tokens.push(tok);
+            }
+            in_include = false;
+       }
+    }
+
+    new_tokens
 }
 
 fn is_string(token: &str) -> bool {

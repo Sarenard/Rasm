@@ -3,22 +3,22 @@ import subprocess
 import argparse
 import os
 
-parser = argparse.ArgumentParser(description='PyAsm test script')
+parser = argparse.ArgumentParser(description='rasm test script')
 parser.add_argument('-r', '--record', help='Record the tests', action='store_true')
 parser.add_argument('-t', '--test', help='Run the tests', action='store_true')
 parser.add_argument('-a', '--all', help='Records and tests (warning)', action='store_true')
 args = parser.parse_args()
 if args.all: args.record, args.test = True, True
 
-print(colored("Building pyasm...", "cyan"))
+print(colored("Building rasm...", "cyan"))
 subprocess.run(["cargo", "build", "--release"])
-print(colored("Built pyasm!\n", "cyan"))
+print(colored("Built rasm!\n", "cyan"))
 
 if args.record:
     print(colored("Recording tests...", "cyan"))
     for dossier in os.listdir("tests"):
         print(colored(f"Recording {dossier}", "white"))
-        subprocess.run(["./target/release/pyasm", "-f", f"tests/{dossier}/{dossier}.pyasm"])
+        subprocess.run(["./target/release/rasm", "-f", f"tests/{dossier}/{dossier}.pyasm"])
         output = subprocess.run(["./output/output"], capture_output=True)
         # si tests/dossier/out n'existe pas, on le crée
         if not os.path.exists(f"tests/{dossier}/out"):
@@ -34,7 +34,7 @@ if args.test:
     print(colored("Testing...", "cyan"))
     for dossier in os.listdir("tests"):
         print(colored(f"Testing {dossier}", "white"))
-        subprocess.run(["./target/release/pyasm", "-f", f"tests/{dossier}/{dossier}.pyasm"])
+        subprocess.run(["./target/release/rasm", "-f", f"tests/{dossier}/{dossier}.pyasm"])
         output = subprocess.run(["./output/output"], capture_output=True)
         got_error = False
         if output.returncode != int(open(f"tests/{dossier}/out/{dossier}.return", "r").read()):

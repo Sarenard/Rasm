@@ -1,0 +1,4 @@
+#include std/std.pyasm
+
+
+3 print

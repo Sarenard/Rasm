@@ -22,8 +22,13 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
     #[cfg(debug_assertions)]
     println!("tokens: {:?}", tokens);
 
+    // we parse the includes
+    let includes_tokens = parser::parse_includes(tokens);
+    #[cfg(debug_assertions)]
+    println!("after includes: {:?}", includes_tokens);
+
     // we parse the macros
-    let macros_tokens = parser::parse_macros(tokens);
+    let macros_tokens = parser::parse_macros(includes_tokens);
     #[cfg(debug_assertions)]
     println!("after macros: {:?}", macros_tokens);
 

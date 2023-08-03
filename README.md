@@ -2,7 +2,7 @@
 
 Rasm est un language approximatif, codé en rust et qui se compile en assmbleur x86_64.
 
-Non, je ne connais ni le rust ni l'assembleur, mais oui je me lance la dedans, on verra bien
+Non, je ne connais ni le rust ni l'assembleur, mais oui je me lance la dedans, on verra bien  
 Inspiré de <https://gitlab.com/tsoding/porth>
 
 

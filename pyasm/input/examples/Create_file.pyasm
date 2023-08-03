@@ -1,0 +1,5 @@
+"Nom du fichier :"
+10 mem 1 0 syscall3
+"Le nom du fichier choisi est :"
+10 mem 1 1 syscall3
+8 511 mem 2 syscall3

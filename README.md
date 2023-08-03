@@ -3,8 +3,24 @@
 Rasm est un language approximatif, codé en rust et qui se compile en assmbleur x86_64.
 
 Non, je ne connais ni le rust ni l'assembleur, mais oui je me lance la dedans, on verra bien  
-Inspiré de <https://gitlab.com/tsoding/porth>
 
+### Comment lancer rasm ?
+Pour compiler et lancer `input/input.pyasm`
+```bash
+cargo build && ./target/debug/rasm -f input/input.pyasm && ./output/output
+```
+Pour lancer les tests
+```bash
+python3 test.py -t
+```
+Pour enregistrer de nouveaux tests
+```bash
+python3 test.py -r
+```
+Pour juste compiler rasm
+```bash
+cargo build --release
+```
 
 ## Objectifs long terme :
 - [ ] Turing complet
@@ -26,7 +42,8 @@ Inspiré de <https://gitlab.com/tsoding/porth>
 - [x] système de mémoire
 - [ ] stdlib (refaire celle du C?)
 - [x] découper rasm en plusieurs fichiers
-- [ ] Détailler plus la syntaxe
+- [ ] Détailler plus la syntaxe dans le readme
+- [ ] Ignorer les commentaires
 
 ## Syntaxe
 #### Découpage
@@ -60,3 +77,8 @@ Additionne les deux éléments sur la stack et push le résultat
 ```py
 stack.push(stack.pop() + stack.pop())
 ```
+
+## Inspirations et remerciments
+
+- [Porth](https://gitlab.com/tsoding/porth) Pour l'idée d'un language compilé en assembleur
+- [@tsodingDaily](https://www.youtube.com/@TsodingDaily) Pour m'avoir donné envie de créer un language, puis un autre, puis un autre...

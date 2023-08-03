@@ -1,0 +1,4 @@
+"Quel est ton nom ?"
+10 mem 1 0 syscall3
+"Ton nom est :"
+10 mem 1 1 syscall3

@@ -1,4 +1,5 @@
-use std::collections::VecDeque;
+#[macro_use] extern crate fallthrough;
+use std::collections::{VecDeque, HashMap};
 use std::process::Command;
 use std::io::prelude::*;
 use std::fs::File;
@@ -38,7 +39,8 @@ command_enum!(
     Ne,
     Ge,
     Le,
-    PrintStringConst // temporary
+    PrintStringConst, // temporary
+    Syscall
 );
 
 fn main() -> std::io::Result<()> {
@@ -54,20 +56,20 @@ fn main() -> std::io::Result<()> {
 
     make_asm(input_file).expect("failed to make asm");
 
-    let _nasm_output = Command::new("nasm")
+    let nasm_output = Command::new("nasm")
         .args(["-f", "elf64", "output/output.asm", "-o", "output/output.o"])
         .output()
         .expect("failed to execute process");
-    if !_nasm_output.status.success() {
-        println!("nasm output: {:?}", _nasm_output);
+    if !nasm_output.status.success() {
+        println!("nasm output: {:?}", nasm_output);
         return Ok(());
     }
-    let _ld_output = Command::new("ld")
+    let ld_output = Command::new("ld")
         .args(["-m", "elf_x86_64", "output/output.o", "-o", "output/output"])
         .output()
         .expect("failed to execute process");
-    if !_ld_output.status.success() {
-        println!("ld output: {:?}", _ld_output);
+    if !ld_output.status.success() {
+        println!("ld output: {:?}", ld_output);
         return Ok(());
     }
     Ok(())
@@ -81,11 +83,18 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
     let mut contents = String::new();
     input_file.read_to_string(&mut contents)?;
 
+    // we get tokens from file
     let tokens = file_to_tok(&contents.to_string());
     #[cfg(debug_assertions)]
     println!("tokens: {:?}", tokens);
-    
-    let commands = tok_to_commands(tokens);
+
+    // we parse the macros
+    let macros_tokens = parse_macros(tokens);
+    #[cfg(debug_assertions)]
+    println!("after macros: {:?}", macros_tokens);
+
+    // we get commands from tokens
+    let commands = tok_to_commands(macros_tokens);
     #[cfg(debug_assertions)]
     println!("commands: {:?}", commands);
 
@@ -258,6 +267,29 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
                     args[1].as_str()).as_str()
                 );
                 program.push_str("  syscall\n\n");
+            },
+            #[allow(unreachable_code)] // pour que la macro marche
+            (Commands::Syscall, args) => {
+                program.push_str(format!(
+                    "  ; syscall with {} args\n", 
+                    args[0].as_str()).as_str()
+                );
+                let mut syscall_args: Vec<&str> = Vec::new();
+                match_fallthrough!(args[0].as_str(), {
+                    "6" => {syscall_args.push("  pop r9");},
+                    "5" => {syscall_args.push("  pop r8");},
+                    "4" => {syscall_args.push("  pop r10");},
+                    "3" => {syscall_args.push("  pop rdx");},
+                    "2" => {syscall_args.push("  pop rsi");},
+                    "1" => {syscall_args.push("  pop rdi");},
+                    "0" => {syscall_args.push("  pop rax");break;},
+                    _ => { panic!("Unreachable"); },
+                });
+                for str in syscall_args.iter().rev() {
+                    program.push_str(str);
+                    program.push_str("\n");
+                }
+                program.push_str("  syscall\n\n");
             }
         }
     }
@@ -292,57 +324,72 @@ fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
             }
         }
         else if token.chars().all(char::is_numeric) {
-            commands.push((Commands::Push, [token].to_vec()));
+            commands.push((Commands::Push, vec![token]));
         }
         else if token == "." {
-            commands.push((Commands::Dump, [].to_vec()));
+            commands.push((Commands::Dump, vec![]));
         }
         else if token == "+" {
-            commands.push((Commands::Add, [].to_vec()));
+            commands.push((Commands::Add, vec![]));
         }
         else if token == "-" {
-            commands.push((Commands::Sub, [].to_vec()));
+            commands.push((Commands::Sub, vec![]));
         }
         else if token == "dup" {
-            commands.push((Commands::Dup, [].to_vec()));
+            commands.push((Commands::Dup, vec![]));
         }
         else if token == "if" {
-            commands.push((Commands::If, [unique_nb.to_string()].to_vec()));
+            commands.push((Commands::If, vec![unique_nb.to_string()]));
             states.push_back((Commands::If, unique_nb));
             unique_nb += 1;
         }
         else if token == "while" {
-            commands.push((Commands::While, [unique_nb.to_string()].to_vec()));
+            commands.push((Commands::While, vec![unique_nb.to_string()]));
             states.push_back((Commands::While, unique_nb));
             unique_nb += 1;
         }
         else if token == ">" {
-            commands.push((Commands::G, [unique_nb.to_string()].to_vec()));
+            commands.push((Commands::G, vec![unique_nb.to_string()]));
             unique_nb += 1;
         }
         else if token == "<" {
-            commands.push((Commands::L, [unique_nb.to_string()].to_vec()));
+            commands.push((Commands::L, vec![unique_nb.to_string()]));
             unique_nb += 1;
         }
         else if token == "=" {
-            commands.push((Commands::E, [unique_nb.to_string()].to_vec()));
+            commands.push((Commands::E, vec![unique_nb.to_string()]));
             unique_nb += 1;
         }
         else if token == "!=" {
-            commands.push((Commands::Ne, [unique_nb.to_string()].to_vec()));
+            commands.push((Commands::Ne, vec![unique_nb.to_string()]));
             unique_nb += 1;
         }
         else if token == ">=" {
-            commands.push((Commands::Ge, [unique_nb.to_string()].to_vec()));
+            commands.push((Commands::Ge, vec![unique_nb.to_string()]));
             unique_nb += 1;
         }
         else if token == "<=" {
-            commands.push((Commands::Le, [unique_nb.to_string()].to_vec()));
+            commands.push((Commands::Le, vec![unique_nb.to_string()]));
             unique_nb += 1;
         }
         else if is_string(&token) {
             commands.push((Commands::PrintStringConst, [token, format!("{}", mess_nb)].to_vec()));
             mess_nb += 1;
+        }
+        // si le string commence par syscall
+        else if token.starts_with("syscall") {
+            // on récupère le nombre après syscall
+            let nb = token.chars().skip(7).collect::<String>();
+            // on vérifie que c'est bien un nombre
+            if nb.chars().all(char::is_numeric) {
+                // on convertit le nombre en u64
+                let nb = nb.parse::<u64>().unwrap();
+                // on ajoute la commande syscall
+                commands.push((Commands::Syscall, [nb.to_string()].to_vec()));
+            }
+            else {
+                println!("Error : syscall invoqued without a number");
+            }
         }
         else {
             println!("Error : token: {}", token);
@@ -407,4 +454,72 @@ fn cut_string(value: &str) -> &str {
     chars.next();
     chars.next_back();
     chars.as_str()
+}
+
+fn parse_macros(tokens: Vec<String>) -> Vec<String> {
+    let mut new_tokens: Vec<String> = Vec::new();
+    let mut macros: HashMap<String, Vec<String>> = HashMap::new();
+    let mut current: Vec<String> = Vec::new();
+    let mut end_counter = 0;
+    let mut in_macro: bool = false;
+
+    for token in tokens.clone() {
+        if token == "macro" {
+            in_macro = true;
+        }
+        else if token == "if" || token == "while" {
+            end_counter += 1;
+        }
+        else if token == "end" {
+            if end_counter == 0 {
+                in_macro = false;
+                macros.insert(current[1].clone(), current[2..].to_vec());
+                current.clear();
+            }
+            else {
+                end_counter -= 1;
+            }
+        }
+        if in_macro {
+            current.push(token.clone());
+        }
+    }
+
+    println!("{:?}", macros);
+
+    for token in tokens {
+        if macros.contains_key(&token) {
+            new_tokens.append(&mut macros[&token].clone());
+        }
+        else {
+            new_tokens.push(token);
+        }
+    }
+
+    let mut true_tokens: Vec<String> = Vec::new();
+
+    // we remove the macros
+    let mut in_macro: bool = false;
+    let mut end_counter: i32 = 0;
+    for token in new_tokens.clone() {
+        if !in_macro {
+            true_tokens.push(token.clone());
+        }
+        if token == "macro" {
+            in_macro = true;
+        }
+        else if token == "if" || token == "while" {
+            end_counter += 1;
+        }
+        else if token == "end" {
+            if end_counter == 0 {
+                in_macro = false;
+            }
+            else {
+                end_counter -= 1;
+            }
+        }
+    }
+
+    true_tokens
 }

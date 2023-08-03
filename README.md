@@ -84,3 +84,4 @@ stack.push(stack.pop() + stack.pop())
 
 - [Porth](https://gitlab.com/tsoding/porth) Pour l'idée d'un language compilé en assembleur
 - [@tsodingDaily](https://www.youtube.com/@TsodingDaily) Pour m'avoir donné envie de créer un language, puis un autre, puis un autre...
+- [@rchapman](https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64/) Pour ce magnifique blog sur les syscall linux

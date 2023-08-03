@@ -485,8 +485,6 @@ fn parse_macros(tokens: Vec<String>) -> Vec<String> {
         }
     }
 
-    println!("{:?}", macros);
-
     for token in tokens {
         if macros.contains_key(&token) {
             new_tokens.append(&mut macros[&token].clone());
@@ -498,17 +496,17 @@ fn parse_macros(tokens: Vec<String>) -> Vec<String> {
 
     let mut true_tokens: Vec<String> = Vec::new();
 
-    // we remove the macros
+    // we remove the macro definitions
     let mut in_macro: bool = false;
     let mut end_counter: i32 = 0;
     for token in new_tokens.clone() {
-        if !in_macro {
-            true_tokens.push(token.clone());
-        }
         if token == "macro" {
             in_macro = true;
         }
-        else if token == "if" || token == "while" {
+        if !in_macro {
+            true_tokens.push(token.clone());
+        }
+        if token == "if" || token == "while" {
             end_counter += 1;
         }
         else if token == "end" {

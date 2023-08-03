@@ -1,0 +1,3 @@
+macro test 3 . end
+
+test

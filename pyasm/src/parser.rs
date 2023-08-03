@@ -113,6 +113,9 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
         else if token == "over" {
             commands.push((Commands::Over, vec![]));
         }
+        else if token == "rot" {
+            commands.push((Commands::Rot, vec![]));
+        }
         else {
             println!("Error : token: {}", token);
         }

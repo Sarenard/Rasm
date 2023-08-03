@@ -46,7 +46,7 @@ cargo build --release
 - [ ] Ignorer les commentaires
 - [x] Syscall => push eax/rax
 - [x] Over
-- [ ] Rot
+- [x] Rot
 
 ## Syntaxe
 #### Découpage

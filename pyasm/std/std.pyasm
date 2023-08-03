@@ -5,6 +5,8 @@ macro 2dup over over end
 macro write STD_out Sys_write syscall3D end
 
 macro EXIT Sys_exit syscall1D end
+macro OPEN swap drop 438 66 rot rot Sys_open syscall3 end
+macro CLOSE Sys_close syscall1 end
 
 macro syscall0D syscall0 drop end
 macro syscall1D syscall1 drop end

@@ -47,7 +47,8 @@ command_enum!(
     Write8,
     Swap,
     Drop,
-    Over
+    Over,
+    Rot
 );
 
 fn main() -> std::io::Result<()> {

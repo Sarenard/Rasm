@@ -281,6 +281,15 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 program.push_str("  push rdi\n");
                 program.push_str("  push rax\n");
                 program.push_str("  push rdi\n\n");
+            },
+            (Commands::Rot, _) => {
+                program.push_str("  ; rot\n");
+                program.push_str("  pop rax\n");
+                program.push_str("  pop rdi\n");
+                program.push_str("  pop rbx\n");
+                program.push_str("  push rax\n");
+                program.push_str("  push rbx\n");
+                program.push_str("  push rdi\n\n");
             }
         }
     }

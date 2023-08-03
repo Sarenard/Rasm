@@ -1,15 +1,11 @@
 #include std/std.pyasm
 
+"input/examples/Print_himself.pyasm" OPEN dup
 200
-mem
-
-438
-66
-"input/examples/Print_himself.pyasm" swap drop 
-Sys_open
-syscall3
-
+mem rot rot
 Sys_read
 syscall3
+
+CLOSE
 
 200 mem write

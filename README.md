@@ -44,6 +44,7 @@ cargo build --release
 - [x] découper rasm en plusieurs fichiers
 - [ ] Détailler plus la syntaxe dans le readme
 - [ ] Ignorer les commentaires
+- [ ] Syscall => push eax/rax
 
 ## Syntaxe
 #### Découpage

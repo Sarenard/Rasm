@@ -1,0 +1,9 @@
+macro double 2 * end
+macro print dup . end
+
+10 dup 0 > while
+    1 -
+    dup double .
+
+    dup 0 >
+end

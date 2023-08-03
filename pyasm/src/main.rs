@@ -40,7 +40,8 @@ command_enum!(
     Ge,
     Le,
     PrintStringConst, // temporary
-    Syscall
+    Syscall,
+    Mul
 );
 
 fn main() -> std::io::Result<()> {
@@ -291,6 +292,13 @@ fn make_asm(input_file: &str) -> std::io::Result<()> {
                     program.push_str("\n");
                 }
                 program.push_str("  syscall\n\n");
+            },
+            (Commands::Mul, _) => {
+                program.push_str("  ; mul\n");
+                program.push_str("  pop rax\n");
+                program.push_str("  pop rdi\n");
+                program.push_str("  mul rdi\n");
+                program.push_str("  push rax\n\n");
             }
         }
     }
@@ -391,6 +399,9 @@ fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
             else {
                 println!("Error : syscall invoqued without a number");
             }
+        }
+        else if token == "*" {
+            commands.push((Commands::Mul, vec![]));
         }
         else {
             println!("Error : token: {}", token);

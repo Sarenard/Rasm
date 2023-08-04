@@ -48,7 +48,11 @@ command_enum!(
     Swap,
     Drop,
     Over,
-    Rot
+    Rot,
+    Func,
+    EndFunc,
+
+    Unknown
 );
 
 fn main() -> std::io::Result<()> {

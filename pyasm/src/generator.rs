@@ -34,9 +34,23 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
     println!("after macros: {:?}", macros_tokens);
 
     // we get commands from tokens
-    let commands = parser::tok_to_commands(macros_tokens);
+    let commands: Vec<(Commands, Vec<String>)> = parser::tok_to_commands(macros_tokens);
     #[cfg(debug_assertions)]
     println!("commands: {:?}", commands);
+
+    let functions: HashMap<String, String> = commands.iter()
+    .filter_map(|x| {
+        if x.0 == Commands::Func {
+            Some((x.1[1].clone(), x.1[0].clone()))
+        } else {
+            None
+        }
+    })
+    .collect();
+
+
+    #[cfg(debug_assertions)]
+    println!("functions: {:?}", functions);
 
     program.push_str("section .data\n");
     program.push_str("  ; constants\n");
@@ -102,7 +116,7 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
     program.push_str("    ret\n");
 
     program.push_str("global _start\n");
-    program.push_str("_start:\n");
+    program.push_str("_start:\n\n");
 
 
     for command in commands {
@@ -308,6 +322,43 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 program.push_str("  push rax\n");
                 program.push_str("  push rbx\n");
                 program.push_str("  push rdi\n\n");
+            },
+            (Commands::Func, args) => {
+                program.push_str(format!(
+                    "  ; function definition : {} \n", 
+                    args[1].as_str()).as_str()
+                );
+                program.push_str(format!(
+                    "  jmp fn_{}_end\n", 
+                    args[0].as_str()).as_str()
+                );
+                program.push_str(format!(
+                    "fn_{}_start:\n\n", 
+                    args[0].as_str()).as_str()
+                );
+            },
+            (Commands::EndFunc, args) => {
+                program.push_str("  ret\n\n");
+                program.push_str(format!(
+                    "fn_{}_end:\n\n", 
+                    args[0].as_str()).as_str()
+                );
+            },
+            (Commands::Unknown, args) => {
+                // si c'est dans la hashmap functions
+                if functions.contains_key(args[0].as_str()) {
+                    program.push_str(format!(
+                        "  ; call function : {} \n", 
+                        args[0].as_str()).as_str()
+                    );
+                    program.push_str(format!(
+                        "  call fn_{}_start\n\n", 
+                        functions[args[0].as_str()]).as_str()
+                    );
+                    // copilot suggested to push rax, idk if it's nessessary
+                } else {
+                    panic!("Unknown command : {}", args[0].as_str());
+                }
             }
         }
     }

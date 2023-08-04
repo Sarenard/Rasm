@@ -9,6 +9,7 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
     let mut unique_nb: u64 = 0;
     let mut mess_nb: u64 = 0;
     let mut states: VecDeque<(Commands, u64)> = VecDeque::new();
+    let mut in_func_def: bool = false;
 
     for token in tokens {
         if token == "end" {
@@ -18,6 +19,9 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
                 },
                 Some((Commands::While, nb)) => {
                     commands.push((Commands::EndWhile, [nb.to_string()].to_vec()));
+                },
+                Some((Commands::Func, nb)) => {
+                    commands.push((Commands::EndFunc, [nb.to_string()].to_vec()));
                 },
                 _ => {
                     println!("Error : end");
@@ -48,6 +52,9 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
             commands.push((Commands::While, vec![unique_nb.to_string()]));
             states.push_back((Commands::While, unique_nb));
             unique_nb += 1;
+        }
+        else if token == "func" {
+            in_func_def = true;
         }
         else if token == ">" {
             commands.push((Commands::G, vec![unique_nb.to_string()]));
@@ -134,7 +141,15 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
             commands.push((Commands::Rot, vec![]));
         }
         else {
-            println!("Error : token: {}", token);
+            if in_func_def {
+                in_func_def = false;
+                commands.push((Commands::Func, vec![unique_nb.to_string(), token]));
+                states.push_back((Commands::Func, unique_nb));
+                unique_nb += 1;
+            }
+            else {
+                commands.push((Commands::Unknown, vec![token]));
+            }
         }
     }
     commands
@@ -150,7 +165,7 @@ pub fn parse_macros(tokens: Vec<String>, mut macros: HashMap<String, Vec<String>
         if token == "macro" {
             in_macro = true;
         }
-        else if token == "if" || token == "while" {
+        else if token == "if" || token == "while" || token == "func" {
             end_counter += 1;
         }
         else if token == "end" {
@@ -192,7 +207,7 @@ pub fn parse_macros(tokens: Vec<String>, mut macros: HashMap<String, Vec<String>
         if !in_macro {
             true_tokens.push(token.clone());
         }
-        if token == "if" || token == "while" {
+        if token == "if" || token == "while" || token == "func" {
             end_counter += 1;
         }
         else if token == "end" {

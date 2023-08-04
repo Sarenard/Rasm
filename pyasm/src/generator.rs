@@ -13,6 +13,7 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
     let mut program = String::new();
 
     const MEMORY_SIZE: i32 = 1000;
+    const FUNCTION_DEPTH_LIMIT: i32 = 10;
     
     let mut input_file = File::open(input_file)?;
     let mut contents = String::new();
@@ -113,7 +114,7 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
     program.push_str("    mov     rax, 1\n");
     program.push_str("    syscall\n");
     program.push_str("    add     rsp, 40\n");
-    program.push_str("    ret\n");
+    program.push_str("    ret\n\n");
 
     program.push_str("global _start\n");
     program.push_str("_start:\n\n");
@@ -227,7 +228,7 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                     "  mov rax, msg{}\n", 
                     args[1].as_str()).as_str()
                 );
-                program.push_str("  push rax\n");
+                program.push_str("  push rax\n\n");
             },
             #[allow(unreachable_code)] // pour que la macro marche
             (Commands::Syscall, args) => {
@@ -262,7 +263,13 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
             },
             (Commands::Mem, _) => {
                 program.push_str("  ; mem\n");
-                program.push_str("  push mem\n\n");
+                program.push_str("  mov rdi, mem\n");
+                
+                program.push_str(format!(
+                    "  add rdi, {} ; to have space for nested functions calls\n", 
+                    FUNCTION_DEPTH_LIMIT+1).as_str()
+                );
+                program.push_str("  push rdi\n\n");
             },
             (Commands::Read, args) => {
                 program.push_str(format!(
@@ -338,6 +345,7 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 );
             },
             (Commands::EndFunc, args) => {
+                // TODO : récupérer l'adresse de la stack de fonctions
                 program.push_str("  ret\n\n");
                 program.push_str(format!(
                     "fn_{}_end:\n\n", 
@@ -351,6 +359,9 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                         "  ; call function : {} \n", 
                         args[0].as_str()).as_str()
                     );
+                    // TODO : mettre l'adresse dans la stack de fonctions
+                    // TODO : check si on est pas a la limite du nombre
+                    //        de fonctions nestés (10 premieres cases de la mémoire)
                     program.push_str(format!(
                         "  call fn_{}_start\n\n", 
                         functions[args[0].as_str()]).as_str()

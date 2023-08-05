@@ -1,0 +1,7 @@
+include std/std.pyasm
+
+func print_42
+    42
+end
+
+print_42 .

@@ -78,7 +78,7 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
         "  mem: resb {}\n", 
         MEMORY_SIZE
     ).as_str());
-    program.push_str("  \n");
+    program.push_str("\n");
 
     program.push_str("section .text\n");
 
@@ -267,7 +267,7 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 
                 program.push_str(format!(
                     "  add rdi, {} ; to have space for nested functions calls\n", 
-                    FUNCTION_DEPTH_LIMIT+1).as_str()
+                    1+(FUNCTION_DEPTH_LIMIT*8)).as_str()
                 );
                 program.push_str("  push rdi\n\n");
             },

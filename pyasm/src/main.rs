@@ -51,7 +51,6 @@ command_enum!(
     Rot,
     Func,
     EndFunc,
-
     Unknown
 );
 

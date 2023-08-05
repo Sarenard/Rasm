@@ -5,3 +5,5 @@ func print_42
 end
 
 print_42 .
+5000 .
+print_42 .

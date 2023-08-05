@@ -1,0 +1,17 @@
+include std/std.pyasm
+
+func print_42
+    func test10 32 end
+    func test9 test10 end
+    func test8 test9 end
+    func test7 test8 end
+    func test6 test7 end
+    func test5 test6 end
+    func test4 test5 end
+    func test3 test4 end
+    func test2 test3 end
+    func test1 test2 end
+    42 test1 +
+end
+
+print_42 .

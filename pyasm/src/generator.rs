@@ -65,6 +65,9 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
     program.push_str("  STD_out         equ 1\n");
     program.push_str("  STD_err         equ 2\n\n");
 
+    program.push_str("  REC_OVERFLOW_MSG db 'Recursion overflow', 10, '', 0\n");
+    program.push_str("  REC_OVERFLOW_MSG_LEN equ $ - REC_OVERFLOW_MSG\n\n");
+
     // on ajoute les constantes de texte
     commands.iter().for_each(|x| {
         if x.0 == Commands::PrintStringConst {
@@ -340,13 +343,43 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                     args[0].as_str()).as_str()
                 );
                 program.push_str(format!(
-                    "fn_{}_start:\n\n", 
+                    "fn_{}_start:\n", 
                     args[0].as_str()).as_str()
                 );
+                program.push_str("  ; on check si la memoire est remplie\n");
+                program.push_str("  xor rax, rax\n");
+                program.push_str("  mov al, byte [mem]\n");
+                program.push_str("  cmp al, 10\n");
+                program.push_str("  je RECURSION_LIMIT\n");
+                program.push_str("  ; on se décale vers la droite\n");
+                program.push_str("  xor rax, rax\n");
+                program.push_str("  mov al, byte [mem]\n");
+                program.push_str("  mov rbx, 8\n");
+                program.push_str("  mul rbx\n");
+                program.push_str("  add rax, 1\n");
+                program.push_str("  ; valeur de l'adresse de retour\n");
+                program.push_str("  pop rbx\n");
+                program.push_str("  mov [mem+rax], rbx\n");
+                program.push_str("  ; on incrémente [mem]\n");
+                program.push_str("  mov al, [mem]\n");
+                program.push_str("  add al, 1\n");
+                program.push_str("  mov [mem], al\n\n");
             },
             (Commands::EndFunc, args) => {
                 // TODO : récupérer l'adresse de la stack de fonctions
-                program.push_str("  ret\n\n");
+                program.push_str("  ; remove 1 from [mem]\n");
+                program.push_str("  mov al, [mem]\n");
+                program.push_str("  sub al, 1\n");
+                program.push_str("  mov [mem], al\n");
+                program.push_str("  ; compute of return adress\n");
+                program.push_str("  xor rax, rax\n");
+                program.push_str("  mov al, byte [mem]\n");
+                program.push_str("  mov rbx, 8\n");
+                program.push_str("  mul rbx\n");
+                program.push_str("  add rax, 1\n");
+                program.push_str("  ; return \n");
+                program.push_str("  mov rax, [mem+rax]\n");
+                program.push_str("  jmp rax\n\n");
                 program.push_str(format!(
                     "fn_{}_end:\n\n", 
                     args[0].as_str()).as_str()
@@ -378,7 +411,21 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
     program.push_str("  ; we end the program and return 0\n");
     program.push_str("  mov rax, SYS_exit\n");
     program.push_str("  mov rdi, EXIT_SUCCESS\n");
+    program.push_str("  syscall\n\n");
+
+    program.push_str("RECURSION_LIMIT:\n");
+    program.push_str("  ; print error msg\n");
+    program.push_str("  mov rax, 1\n");
+    program.push_str("  mov rdi, 1\n");
+    program.push_str("  mov rsi, REC_OVERFLOW_MSG\n");
+    program.push_str("  mov rdx, REC_OVERFLOW_MSG_LEN\n");
+    program.push_str("  syscall\n\n");
+    program.push_str("  ; exit\n");
+    program.push_str("  pop rax\n");
+    program.push_str("  mov rax, SYS_exit\n");
+    program.push_str("  mov rdi, EXIT_FAIL\n");
     program.push_str("  syscall\n");
+
     file.write_all(program.as_bytes())?;
     Ok(())
 }

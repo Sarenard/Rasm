@@ -9,7 +9,7 @@ macro DEBUG 0 end
 // on part de 0
 0 write_a 
 
-// on rajoute tout les multiples de 3 jusqu'a 1000
+// on rajoute tout les multiples de 3 jusqu'a MAX
 MAX 0 2dup > while
     DEBUG if print end
     dup read_a + write_a
@@ -17,7 +17,7 @@ MAX 0 2dup > while
     2dup >
 end
 
-// on rajoute tout les multiples de 5 jusqu'a 1000
+// on rajoute tout les multiples de 5 jusqu'a MAX
 MAX 0 2dup > while
     DEBUG if print end
     dup read_a + write_a
@@ -25,7 +25,7 @@ MAX 0 2dup > while
     2dup >
 end
 
-// on enlève les multiples de 15
+// on enlève les multiples de 15 jusqu'a MAX
 MAX 0 2dup > while
     DEBUG if print end
     dup read_a swap - write_a

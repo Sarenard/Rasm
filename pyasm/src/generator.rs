@@ -284,8 +284,8 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 match args[0].as_str() {
                     "8"  => {program.push_str("  mov bl, BYTE [rax]\n");},
                     "16" => {program.push_str("  mov bx, WORD [rax]\n");},
-                    "32" => {program.push_str("  mov ebx, DOUBLEWORD [rax]\n");},
-                    "64" => {program.push_str("  mov rbx, QUADWORD [rax]\n");},
+                    "32" => {program.push_str("  mov ebx, DWORD [rax]\n");},
+                    "64" => {program.push_str("  mov rbx, QWORD [rax]\n");},
                     _ => { panic!("Wrong size for read"); },
                 }
                 program.push_str("  push rbx\n\n");
@@ -300,8 +300,8 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 match args[0].as_str() {
                     "8"  => {program.push_str("  mov BYTE [rax], bl\n\n");},
                     "16" => {program.push_str("  mov WORD [rax], bx\n\n");},
-                    "32" => {program.push_str("  mov DOUBLEWORD [rax], ebx\n\n");},
-                    "64" => {program.push_str("  mov QUADWORD [rax], rbx\n\n");},
+                    "32" => {program.push_str("  mov DWORD [rax], ebx\n\n");},
+                    "64" => {program.push_str("  mov QWORD [rax], rbx\n\n");},
                     _ => { panic!("Wrong size for write"); },
                 }
             },

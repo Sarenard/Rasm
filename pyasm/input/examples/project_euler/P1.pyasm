@@ -1,0 +1,37 @@
+include std/std.pyasm
+
+macro read_a mem 0 + read64 end
+macro write_a mem 0 + swap write64 end
+
+macro MAX 1000 end
+macro DEBUG 0 end
+
+// on part de 0
+0 write_a 
+
+// on rajoute tout les multiples de 3 jusqu'a 1000
+MAX 0 2dup > while
+    DEBUG if print end
+    dup read_a + write_a
+    3 +
+    2dup >
+end
+
+// on rajoute tout les multiples de 5 jusqu'a 1000
+MAX 0 2dup > while
+    DEBUG if print end
+    dup read_a + write_a
+    5 +
+    2dup >
+end
+
+// on enlève les multiples de 15
+MAX 0 2dup > while
+    DEBUG if print end
+    dup read_a swap - write_a
+    15 +
+    2dup >
+end
+
+// on affiche le résultat
+read_a .

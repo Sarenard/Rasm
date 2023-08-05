@@ -57,6 +57,7 @@ cargo build --release
 - [x] Over
 - [x] Rot
 - [x] Mémoire 8/16/32/64 bits
+- [x] Fonctions sans modifier la stack
 
 ## Syntaxe
 

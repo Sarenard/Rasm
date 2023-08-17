@@ -58,7 +58,8 @@ cargo build --release
 - [x] Rot
 - [x] Mémoire 8/16/32/64 bits
 - [x] Fonctions sans modifier la stack
-- [x] Gérer les booléens
+- [ ] Gérer les booléens
+- [ ] Tests insensible \n \r\n
 
 ## Syntaxe
 

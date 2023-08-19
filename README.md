@@ -55,6 +55,7 @@ cargo build --release
 - [x] Ignorer les commentaires
 - [x] Syscall => push eax/rax
 - [x] Over
+- [x] Divmod
 - [x] Rot
 - [x] Mémoire 8/16/32/64 bits
 - [x] Fonctions sans modifier la stack
@@ -118,6 +119,23 @@ Multiplie les deux éléments sur la stack et push le résultat
 
 ```py
 stack.push(stack.pop() * stack.pop())
+```
+
+### `divmod`
+
+Calcule le reste et le dividende
+
+```dart
+5 10 divmod
+```
+
+```py
+nombre = stack.pop()
+diviseur = stack.pop()
+reste = nombre % diviseur
+dividende = nombre // diviseur
+stack.push(dividende)
+stack.push(reste)
 ```
 
 ## Inspirations et remerciments

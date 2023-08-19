@@ -51,7 +51,8 @@ command_enum!(
     Rot,
     Func,
     EndFunc,
-    Unknown
+    Unknown,
+    Div
 );
 
 fn main() -> std::io::Result<()> {

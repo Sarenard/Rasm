@@ -403,6 +403,15 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 } else {
                     panic!("Unknown command : {}", args[0].as_str());
                 }
+            },
+            (Commands::Div, _) => {
+                program.push_str("  ; divmod\n");
+                program.push_str("  xor rdx, rdx\n");
+                program.push_str("  pop rax\n");
+                program.push_str("  pop rcx\n");
+                program.push_str("  div rcx\n");
+                program.push_str("  push rdx\n");
+                program.push_str("  push rax\n\n");
             }
         }
     }

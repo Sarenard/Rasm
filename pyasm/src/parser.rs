@@ -140,6 +140,9 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
         else if token == "rot" {
             commands.push((Commands::Rot, vec![]));
         }
+        else if token == "divmod" {
+            commands.push((Commands::Div, vec![]));
+        }
         else {
             if in_func_def {
                 in_func_def = false;

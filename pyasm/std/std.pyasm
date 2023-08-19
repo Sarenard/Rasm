@@ -1,5 +1,8 @@
 macro print dup . end
 
+macro / divmod swap drop end
+macro % divmod drop end
+
 macro 2dup over over end
 
 macro tprint STD_out Sys_write syscall3D end

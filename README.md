@@ -55,6 +55,7 @@ cargo build --release
 - [x] Ignorer les commentaires
 - [x] Syscall => push eax/rax
 - [x] Over
+- [x] Fonctions séparées de mem
 - [x] Divmod
 - [x] Rot
 - [x] Mémoire 8/16/32/64 bits

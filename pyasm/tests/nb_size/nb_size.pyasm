@@ -1,0 +1,7 @@
+include std/std.pyasm
+
+10 nb_size . 
+100 nb_size .
+2434 nb_size .
+9999 nb_size .
+1 nb_size .

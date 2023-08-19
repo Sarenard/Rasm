@@ -6,32 +6,32 @@ macro write_a mem 0 + swap write64 end
 macro MAX 1000 end
 macro DEBUG 0 end
 
-// on part de 0
+// we start from 0
 0 write_a 
 
-// on rajoute tout les multiples de 3 jusqu'a MAX
-MAX 0 2dup > while
-    DEBUG if print end
-    dup read_a + write_a
-    3 +
-    2dup >
+// function to add the multiples of a number to MAX
+func add_multiple
+    MAX 0 2dup > while
+        DEBUG if print end
+        dup read_a + write_a
+        rot rot swap over + rot rot swap
+        2dup >
+    end
 end
 
-// on rajoute tout les multiples de 5 jusqu'a MAX
-MAX 0 2dup > while
-    DEBUG if print end
-    dup read_a + write_a
-    5 +
-    2dup >
+// function to remove the multiples of a number to MAX
+func remove_multiple
+    MAX 0 2dup > while
+        DEBUG if print end
+        dup read_a swap - write_a
+        rot rot swap over + rot rot swap
+        2dup >
+    end
 end
 
-// on enlève les multiples de 15 jusqu'a MAX
-MAX 0 2dup > while
-    DEBUG if print end
-    dup read_a swap - write_a
-    15 +
-    2dup >
-end
+3 add_multiple
+5 add_multiple
+15 remove_multiple
 
-// on affiche le résultat
+// we show the result
 read_a .

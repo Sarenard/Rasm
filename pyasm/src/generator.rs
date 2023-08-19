@@ -81,6 +81,10 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
         "  mem: resb {}\n", 
         MEMORY_SIZE
     ).as_str());
+    program.push_str(format!(
+        "  func_space: resb {}\n", 
+        FUNCTION_DEPTH_LIMIT * 8
+    ).as_str());
     program.push_str("\n");
 
     program.push_str("section .text\n");
@@ -267,11 +271,6 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
             (Commands::Mem, _) => {
                 program.push_str("  ; mem\n");
                 program.push_str("  mov rdi, mem\n");
-                
-                program.push_str(format!(
-                    "  add rdi, {} ; to have space for nested functions calls\n", 
-                    1+(FUNCTION_DEPTH_LIMIT*8)).as_str()
-                );
                 program.push_str("  push rdi\n\n");
             },
             (Commands::Read, args) => {
@@ -348,37 +347,37 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 );
                 program.push_str("  ; on check si la memoire est remplie\n");
                 program.push_str("  xor rax, rax\n");
-                program.push_str("  mov al, byte [mem]\n");
+                program.push_str("  mov al, byte [func_space]\n");
                 program.push_str("  cmp al, 10\n");
                 program.push_str("  je RECURSION_LIMIT\n");
                 program.push_str("  ; on se décale vers la droite\n");
                 program.push_str("  xor rax, rax\n");
-                program.push_str("  mov al, byte [mem]\n");
+                program.push_str("  mov al, byte [func_space]\n");
                 program.push_str("  mov rbx, 8\n");
                 program.push_str("  mul rbx\n");
                 program.push_str("  add rax, 1\n");
                 program.push_str("  ; valeur de l'adresse de retour\n");
                 program.push_str("  pop rbx\n");
-                program.push_str("  mov [mem+rax], rbx\n");
-                program.push_str("  ; on incrémente [mem]\n");
-                program.push_str("  mov al, [mem]\n");
+                program.push_str("  mov [func_space+rax], rbx\n");
+                program.push_str("  ; on incrémente [func_space]\n");
+                program.push_str("  mov al, [func_space]\n");
                 program.push_str("  add al, 1\n");
-                program.push_str("  mov [mem], al\n\n");
+                program.push_str("  mov [func_space], al\n\n");
             },
             (Commands::EndFunc, args) => {
                 // TODO : récupérer l'adresse de la stack de fonctions
-                program.push_str("  ; remove 1 from [mem]\n");
-                program.push_str("  mov al, [mem]\n");
+                program.push_str("  ; remove 1 from [func_space]\n");
+                program.push_str("  mov al, [func_space]\n");
                 program.push_str("  sub al, 1\n");
-                program.push_str("  mov [mem], al\n");
+                program.push_str("  mov [func_space], al\n");
                 program.push_str("  ; compute of return adress\n");
                 program.push_str("  xor rax, rax\n");
-                program.push_str("  mov al, byte [mem]\n");
+                program.push_str("  mov al, byte [func_space]\n");
                 program.push_str("  mov rbx, 8\n");
                 program.push_str("  mul rbx\n");
                 program.push_str("  add rax, 1\n");
                 program.push_str("  ; return \n");
-                program.push_str("  mov rax, [mem+rax]\n");
+                program.push_str("  mov rax, [func_space+rax]\n");
                 program.push_str("  jmp rax\n\n");
                 program.push_str(format!(
                     "fn_{}_end:\n\n", 

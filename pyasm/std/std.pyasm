@@ -1,5 +1,16 @@
 macro print dup . end
 
+func nb_size 
+    0
+    swap
+    dup 0 > while
+        swap 1 + swap
+        10 swap /
+        dup 0 >
+    end
+    drop
+end
+
 macro / divmod swap drop end
 macro % divmod drop end
 

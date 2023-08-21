@@ -62,6 +62,8 @@ cargo build --release
 - [x] Fonctions sans modifier la stack
 - [ ] Gérer les booléens
 - [ ] Tests insensible \n \r\n
+- [ ] Basic memory allocator
+- [ ] If a function is not used, dont compile it
 
 ## Syntaxe
 

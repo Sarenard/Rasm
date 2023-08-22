@@ -173,14 +173,6 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                     "  je ifelse_{}\n", 
                     args[0].as_str()).as_str()
                 );
-                program.push_str(format!(
-                    "  je if_{}\n", 
-                    args[0].as_str()).as_str()
-                );
-                program.push_str(format!(
-                    "  if_{}: ; start of the if label\n\n", 
-                    args[0].as_str()).as_str()
-                );
             },
             (Commands::EndIf, args) => {
                 let else_was_used = if_stack.pop().unwrap().1;

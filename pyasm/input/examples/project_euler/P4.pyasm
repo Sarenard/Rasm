@@ -21,8 +21,8 @@ SETUP_var1 SETUP_var2
 var2 read16 while
     var1 read16 while
         var1 read16 var2 read16 * if_palindrome
-        var1 read16 1 - var1 swap write16 var1 read16
+        var1 read16 1 swap - var1 swap write16 var1 read16
     end
     SETUP_var1
-    var2 read16 1 - var2 swap write16 var2 read16
+    var2 read16 1 swap - var2 swap write16 var2 read16
 end

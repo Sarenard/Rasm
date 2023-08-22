@@ -1,37 +1,32 @@
 include std/std.pyasm
 
-macro read_a mem 0 + read64 end
-macro write_a mem 0 + swap write64 end
+macro TOTAL 0 end
+macro SUB 8 end
+
+macro read mem + read64 end
+macro write mem + swap write64 end
 
 macro MAX 1000 end
 macro DEBUG 0 end
 
 // we start from 0
-0 write_a 
+0 TOTAL write 
 
-// function to add the multiples of a number to MAX
-func add_multiple
+// function to add or remove the multiples up to MAX
+func multiple
     MAX 0 2dup > while
         DEBUG if print end
-        dup read_a + write_a
+        dup TOTAL read SUB read if - else + end TOTAL write
         rot rot swap over + rot rot swap
         2dup >
     end
 end
 
-// function to remove the multiples of a number to MAX
-func remove_multiple
-    MAX 0 2dup > while
-        DEBUG if print end
-        dup read_a - write_a
-        rot rot swap over + rot rot swap
-        2dup >
-    end
-end
-
-3 add_multiple
-5 add_multiple
-15 remove_multiple
+0 SUB write
+3 multiple
+5 multiple
+1 SUB write
+15 multiple
 
 // we show the result
-read_a .
+TOTAL read .

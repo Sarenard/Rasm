@@ -49,7 +49,6 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
     })
     .collect();
 
-
     #[cfg(debug_assertions)]
     println!("functions: {:?}", functions);
 
@@ -126,6 +125,7 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
     program.push_str("global _start\n");
     program.push_str("_start:\n\n");
 
+    let mut if_stack: Vec<(String, bool)> = vec![];
 
     for command in commands {
         match (command.0, command.1) {
@@ -165,20 +165,49 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 program.push_str("  push rax\n\n");
             },
             (Commands::If, args) => {
+                if_stack.push((args[0].clone(), false));
                 program.push_str("  ; if\n");
                 program.push_str("  pop rdi\n");
                 program.push_str("  cmp rdi, 0\n");
                 program.push_str(format!(
-                    "  je if_{}_end\n\n", 
+                    "  je ifelse_{}\n", 
+                    args[0].as_str()).as_str()
+                );
+                program.push_str(format!(
+                    "  je if_{}\n", 
+                    args[0].as_str()).as_str()
+                );
+                program.push_str(format!(
+                    "  if_{}: ; start of the if label\n\n", 
                     args[0].as_str()).as_str()
                 );
             },
             (Commands::EndIf, args) => {
+                let else_was_used = if_stack.pop().unwrap().1;
+                if !else_was_used {
+                    program.push_str(format!(
+                        "  ifelse_{}: ; end of the if\n", 
+                        args[0].as_str()).as_str()
+                    );
+                }
                 program.push_str(format!(
-                    "  if_{}_end: ; end of the if\n\n", 
+                    "  if_end_{}: ; end of the if\n\n", 
                     args[0].as_str()).as_str()
                 );
             },
+            (Commands::Else, _args) => {
+                let mut if_nb = if_stack.pop().unwrap();
+                program.push_str(format!(
+                    "  jmp if_end_{}\n", 
+                    if_nb.0.as_str()).as_str()
+                );
+                program.push_str(format!(
+                    "  ifelse_{}:\n\n", 
+                    if_nb.0.as_str()).as_str()
+                );
+                if_nb.1 = true;
+                if_stack.push(if_nb);
+            }
             (Commands::While, args) => {
                 program.push_str(format!(
                     "  while_{}_start: ; start of the while clause\n", 
@@ -411,7 +440,7 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 program.push_str("  div rcx\n");
                 program.push_str("  push rdx\n");
                 program.push_str("  push rax\n\n");
-            }
+            },
         }
     }
     

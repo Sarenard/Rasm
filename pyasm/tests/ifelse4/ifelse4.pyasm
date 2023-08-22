@@ -1,0 +1,15 @@
+include std/std.pyasm
+
+1 if
+    0 if
+        1 .
+    else
+        2 .
+    end
+else
+    0 if
+        3 .
+    else
+        4 .
+    end
+end

@@ -53,6 +53,9 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
             states.push_back((Commands::While, unique_nb));
             unique_nb += 1;
         }
+        else if token == "else" {
+            commands.push((Commands::Else, vec![unique_nb.to_string()]));
+        }
         else if token == "func" {
             in_func_def = true;
         }

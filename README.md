@@ -124,6 +124,20 @@ Multiplie les deux éléments sur la stack et push le résultat
 stack.push(stack.pop() * stack.pop())
 ```
 
+### `-`
+
+Soustrait le premier element de la stack par le deuxième
+
+```dart
+3 4 -
+```
+
+```py
+a = stack.pop()
+b = stack.pop()
+stack.push(a - b)
+```
+
 ### `divmod`
 
 Calcule le reste et le dividende

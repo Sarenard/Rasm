@@ -153,8 +153,8 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
             },
             (Commands::Sub, _) => {
                 program.push_str("  ; sub\n");
-                program.push_str("  pop rax\n");
                 program.push_str("  pop rdi\n");
+                program.push_str("  pop rax\n");
                 program.push_str("  sub rdi, rax\n");
                 program.push_str("  push rdi\n\n");
             }

@@ -4,5 +4,5 @@ var1 10 write8
 
 var1 read8 while
     mem 0 + read8 dup .
-    mem mem 0 + read8 1 - write8
+    mem mem 0 + read8 1 swap - write8
 end

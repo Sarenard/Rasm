@@ -5,5 +5,5 @@ var1 10 write8
 
 var1 read8 while
     mem 0 + read8 print
-    mem 0 + read8 1 - mem swap write8
+    mem 0 + read8 1 swap - mem swap write8
 end

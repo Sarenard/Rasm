@@ -64,6 +64,8 @@ cargo build --release
 - [ ] Tests insensible \n \r\n
 - [ ] Basic memory allocator
 - [ ] If a function is not used, dont compile it
+- [x] Else
+- [ ] Gérer les tests qui ne terminent jamais comme une erreur
 
 ## Syntaxe
 

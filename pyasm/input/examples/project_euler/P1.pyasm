@@ -23,7 +23,7 @@ end
 func remove_multiple
     MAX 0 2dup > while
         DEBUG if print end
-        dup read_a swap - write_a
+        dup read_a - write_a
         rot rot swap over + rot rot swap
         2dup >
     end

@@ -2,7 +2,7 @@ use crate::Commands;
 
 pub fn simulate(commands: Vec<(Commands, Vec<String>)>) -> u8 {
 
-    let mut stack: Vec<u8> = Vec::new();
+    let mut stack: Vec<u8> = vec![];
     let mut index: usize = 0;
 
     // TODO : finish simulating mode
@@ -32,7 +32,7 @@ pub fn simulate(commands: Vec<(Commands, Vec<String>)>) -> u8 {
                 stack.push(last);
             },
             (Commands::If, _) => {
-                
+
             },
             (Commands::EndIf, _) => {
 

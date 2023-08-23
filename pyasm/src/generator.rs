@@ -3,13 +3,13 @@ use std::fs::File;
 use std::io::Write;
 
 use crate::Commands;
-
 use crate::parser;
 
 pub fn make_asm(commands: Vec<(Commands, Vec<String>)>) -> std::io::Result<()> {
     let mut file = File::create("output/output.asm")?;
     let mut program = String::new();
 
+    // TODO : put this in the main file to share with simulator
     const MEMORY_SIZE: i32 = 1000;
     const FUNCTION_DEPTH_LIMIT: i32 = 10;
 
@@ -62,6 +62,7 @@ pub fn make_asm(commands: Vec<(Commands, Vec<String>)>) -> std::io::Result<()> {
 
     program.push_str("section .text\n");
 
+    // TODO : remove this hardcoded func
     program.push_str("dump:\n");
     program.push_str("    mov     r9, -3689348814741910323\n");
     program.push_str("    sub     rsp, 40\n");
@@ -101,6 +102,7 @@ pub fn make_asm(commands: Vec<(Commands, Vec<String>)>) -> std::io::Result<()> {
 
     let mut if_stack: Vec<(String, bool)> = vec![];
 
+    // TODO : dont compile not used functions
     for command in commands {
         match (command.0, command.1) {
             (Commands::Push, args) => {

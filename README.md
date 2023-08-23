@@ -37,37 +37,6 @@ cargo build --release
 - [ ] Self hosting
 - [ ] Type checking
 
-## Objectifs proches
-
-- [ ] système d'erreurs
-- [ ] tests qui lancent rasm et non pas l'output
-- [ ] tests capable de gérer les erreurs
-- [x] macros
-- [x] includes de fichiers
-- [ ] mode interprété
-- [x] mode compilé
-- [ ] mode debug
-- [x] syscalls
-- [x] système de mémoire
-- [ ] stdlib (refaire celle du C?)
-- [x] découper rasm en plusieurs fichiers
-- [ ] Détailler plus la syntaxe dans le readme
-- [x] Ignorer les commentaires
-- [x] Syscall => push eax/rax
-- [x] Over
-- [x] Fonctions séparées de mem
-- [x] Divmod
-- [x] Rot
-- [x] Mémoire 8/16/32/64 bits
-- [x] Fonctions sans modifier la stack
-- [ ] Gérer les booléens
-- [ ] Tests insensible \n \r\n
-- [ ] Basic memory allocator
-- [ ] If a function is not used, dont compile it
-- [x] Else
-- [ ] Gérer les tests qui ne terminent jamais comme une erreur
-- [ ] Remove the todo hardcoded func
-
 ## Syntaxe
 
 ### Découpage

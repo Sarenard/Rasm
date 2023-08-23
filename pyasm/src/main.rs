@@ -6,11 +6,13 @@ use clap::{App, Arg};
 mod lexer;
 mod parser;
 mod generator;
+mod simulator;
 
 macro_rules! command_enum {
     ($($variant:ident),*) => {
         #[derive(Debug)]
         #[derive(PartialEq)]
+        #[derive(Clone)]
         pub enum Commands {
             $($variant),*
         }
@@ -58,6 +60,7 @@ command_enum!(
     Div
 );
 
+// TODO : debug mode
 fn main() -> std::io::Result<()> {
 
     let matches = App::new("pyasm")
@@ -80,11 +83,21 @@ fn main() -> std::io::Result<()> {
         )
         .arg(
             Arg::with_name("run")
+                .conflicts_with("simulate")
                 .requires("compile")
                 .short('r')
                 .long("run")
                 .value_name("RUN")
                 .help("If specified, runs the program after the compilation")
+                .takes_value(false)
+        )
+        .arg(
+            Arg::with_name("simulate")
+                .conflicts_with("run")
+                .short('s')
+                .long("sim")
+                .value_name("SIMULATES")
+                .help("If specified, simulates the program")
                 .takes_value(false)
         )
         .get_matches();
@@ -105,6 +118,7 @@ fn main() -> std::io::Result<()> {
     #[cfg(debug_assertions)]
     println!("after includes: {:?}", includes_tokens);
 
+    // TODO : handle bools
     // we parse the macros
     let macros_tokens = parser::parse_macros(includes_tokens, HashMap::new());
     #[cfg(debug_assertions)]
@@ -114,8 +128,16 @@ fn main() -> std::io::Result<()> {
     let commands: Vec<(Commands, Vec<String>)> = parser::tok_to_commands(macros_tokens);
     #[cfg(debug_assertions)]
     println!("commands: {:?}", commands);
-
-    generator::make_asm(commands).expect("failed to make asm");
+    
+    // TODO : error system
+    // TODO : memory allocator
+    if matches.contains_id("compile") {
+        generator::make_asm(commands).expect("failed to make asm");
+    }
+    else if matches.contains_id("simulate") {
+        let error_code = simulator::simulate(commands);
+        println!("output code: {}", error_code);
+    }
 
     let nasm_output = Command::new("nasm")
         .args(["-f", "elf64", "output/output.asm", "-o", "output/output.o"])
@@ -135,10 +157,8 @@ fn main() -> std::io::Result<()> {
         return Ok(());
     }
 
-    let runs = matches.contains_id("run");
-
     // run the program as if it was a binary
-    if runs {
+    if matches.contains_id("run") {
         let output = Command::new("./output/output")
             .output()
             .expect("failed to execute process");

@@ -14,11 +14,13 @@ print(colored("Building rasm...", "cyan"))
 subprocess.run(["cargo", "build", "--release"])
 print(colored("Built rasm!\n", "cyan"))
 
+# TODO : ignore difference between \r\n and \n
+
 if args.record:
     print(colored("Recording tests...", "cyan"))
     for dossier in os.listdir("tests"):
         print(colored(f"Recording {dossier}", "white"))
-        subprocess.run(["./target/release/rasm", "-f", f"tests/{dossier}/{dossier}.pyasm"])
+        subprocess.run(["./target/release/rasm", "-f", f"tests/{dossier}/{dossier}.pyasm", "-c"])
         output = subprocess.run(["./output/output"], capture_output=True)
         # si tests/dossier/out n'existe pas, on le crée
         if not os.path.exists(f"tests/{dossier}/out"):
@@ -30,11 +32,14 @@ if args.record:
     print(colored("Recorded all tests !", "cyan"))
     
 if args.test:
+    # TODO : add simulating to tests
+    # TODO : handle errors
+    # TODO : handle infinite loop
     if args.record:print()
     print(colored("Testing...", "cyan"))
     for dossier in os.listdir("tests"):
         print(colored(f"Testing {dossier}", "white"))
-        subprocess.run(["./target/release/rasm", "-f", f"tests/{dossier}/{dossier}.pyasm"])
+        subprocess.run(["./target/release/rasm", "-f", f"tests/{dossier}/{dossier}.pyasm", "-c"])
         output = subprocess.run(["./output/output"], capture_output=True)
         got_error = False
         if output.returncode != int(open(f"tests/{dossier}/out/{dossier}.return", "r").read()):

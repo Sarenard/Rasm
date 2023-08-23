@@ -1,43 +1,17 @@
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::Read;
 use std::io::Write;
 
 use crate::Commands;
 
-use crate::lexer;
 use crate::parser;
 
-pub fn make_asm(input_file: &str) -> std::io::Result<()> {
+pub fn make_asm(commands: Vec<(Commands, Vec<String>)>) -> std::io::Result<()> {
     let mut file = File::create("output/output.asm")?;
     let mut program = String::new();
 
     const MEMORY_SIZE: i32 = 1000;
     const FUNCTION_DEPTH_LIMIT: i32 = 10;
-    
-    let mut input_file = File::open(input_file)?;
-    let mut contents = String::new();
-    input_file.read_to_string(&mut contents)?;
-
-    // we get tokens from file
-    let tokens = lexer::file_to_tok(&contents.to_string());
-    #[cfg(debug_assertions)]
-    println!("tokens: {:?}", tokens);
-
-    // we parse the includes
-    let includes_tokens = parser::parse_includes(tokens);
-    #[cfg(debug_assertions)]
-    println!("after includes: {:?}", includes_tokens);
-
-    // we parse the macros
-    let macros_tokens = parser::parse_macros(includes_tokens, HashMap::new());
-    #[cfg(debug_assertions)]
-    println!("after macros: {:?}", macros_tokens);
-
-    // we get commands from tokens
-    let commands: Vec<(Commands, Vec<String>)> = parser::tok_to_commands(macros_tokens);
-    #[cfg(debug_assertions)]
-    println!("commands: {:?}", commands);
 
     let functions: HashMap<String, String> = commands.iter()
     .filter_map(|x| {

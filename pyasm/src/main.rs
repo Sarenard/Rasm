@@ -1,5 +1,7 @@
 #[macro_use] extern crate fallthrough;
-use std::{env, process::Command};
+use std::process::Command;
+
+use clap::{App, Arg};
 
 mod lexer;
 mod parser;
@@ -58,14 +60,19 @@ command_enum!(
 
 fn main() -> std::io::Result<()> {
 
-    let args: Vec<String> = env::args().collect();
+    let matches = App::new("pyasm")
+        .about("A stack based language")
+        .arg(
+            Arg::with_name("input")
+                .short('f')
+                .long("file")
+                .value_name("FILE")
+                .help("Sets the input file to run")
+                .takes_value(true),
+        )
+        .get_matches();
 
-    if args.len() < 2 {
-        println!("usage: pyasm -f <input file>");
-        return Ok(());
-    }
-
-    let input_file = &args[2];
+    let input_file = matches.value_of("input").unwrap();
 
     generator::make_asm(input_file).expect("failed to make asm");
 

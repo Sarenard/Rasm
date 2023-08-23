@@ -1,4 +1,4 @@
-include std/std.pyasm
+include std/math.pyasm
 
 10 nb_size . 
 100 nb_size .

@@ -1,3 +1,3 @@
-include std/std.pyasm
+include std/math.pyasm
 
 20 3 / .

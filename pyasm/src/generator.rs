@@ -386,7 +386,6 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                 program.push_str("  mov [func_space], al\n\n");
             },
             (Commands::EndFunc, args) => {
-                // TODO : récupérer l'adresse de la stack de fonctions
                 program.push_str("  ; remove 1 from [func_space]\n");
                 program.push_str("  mov al, [func_space]\n");
                 program.push_str("  sub al, 1\n");
@@ -412,14 +411,10 @@ pub fn make_asm(input_file: &str) -> std::io::Result<()> {
                         "  ; call function : {} \n", 
                         args[0].as_str()).as_str()
                     );
-                    // TODO : mettre l'adresse dans la stack de fonctions
-                    // TODO : check si on est pas a la limite du nombre
-                    //        de fonctions nestés (10 premieres cases de la mémoire)
                     program.push_str(format!(
                         "  call fn_{}_start\n\n", 
                         functions[args[0].as_str()]).as_str()
                     );
-                    // copilot suggested to push rax, idk if it's nessessary
                 } else {
                     panic!("Unknown command : {}", args[0].as_str());
                 }

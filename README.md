@@ -9,7 +9,7 @@ Non, je ne connais ni le rust ni l'assembleur, mais oui je me lance la dedans, o
 Pour compiler et lancer `input/input.pyasm`
 
 ```bash
-cargo build && ./target/debug/rasm -f input/input.pyasm && ./output/output
+cargo build && ./target/debug/rasm -f input/input.pyasm --compile --run
 ```
 
 Pour lancer les tests

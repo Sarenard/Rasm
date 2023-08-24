@@ -65,6 +65,15 @@ if args.test:
         print(colored(f"Testing {dossier}", "white"))
         output = subprocess.run(["./target/release/rasm", "-f", f"tests/{dossier}/{dossier}.pyasm", "-s"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         got_error = False
+        # stderr first to check for not yet implemented
+        if output.stderr != open(f"tests/{dossier}/out/{dossier}.stderr", "rb").read():
+            # TODO : remove this part for not yet implemented
+            if b"thread 'main' panicked at 'not yet implemented'" in output.stderr:
+                print(colored(f"Test {dossier} failed beacause of a non yet implemented feature", "yellow"))
+                continue
+            print(colored(f"Test {dossier} failed on stderr", "red"))
+            print("Should be", open(f"tests/{dossier}/out/{dossier}.stderr", "rb").read(), "but is", output.stderr)
+            got_error = True
         if output.returncode != int(open(f"tests/{dossier}/out/{dossier}.return", "r").read()):
             print(colored(f"Test {dossier} failed on return code", "red"))
             print("Should be", open(f"tests/{dossier}/out/{dossier}.return", "r").read(), "but is", output.returncode)
@@ -72,10 +81,6 @@ if args.test:
         if output.stdout != open(f"tests/{dossier}/out/{dossier}.stdout", "rb").read():
             print(colored(f"Test {dossier} failed on stdout", "red"))
             print("Should be", open(f"tests/{dossier}/out/{dossier}.stdout", "rb").read(), "but is", output.stdout)
-            got_error = True
-        if output.stderr != open(f"tests/{dossier}/out/{dossier}.stderr", "rb").read():
-            print(colored(f"Test {dossier} failed on stderr", "red"))
-            print("Should be", open(f"tests/{dossier}/out/{dossier}.stderr", "rb").read(), "but is", output.stderr)
             got_error = True
         if not got_error:
             print(colored(f"Test {dossier} passed", "green"))

@@ -55,6 +55,7 @@ fn main() -> std::io::Result<()> {
         )
         .get_matches();
 
+    // TODO : remove code repetition ("settings.")
     let mut settings = Settings::new();
     settings.add_setting(Setting::MemorySize, 1000);
     settings.add_setting(Setting::FunctionDepthLimit, 10);
@@ -70,6 +71,8 @@ fn main() -> std::io::Result<()> {
     #[cfg(debug_assertions)]
     println!("tokens: {:?}", tokens);
 
+    // TODO : error handling showing the location of the error
+    
     // we parse the includes
     let includes_tokens = parser::parse_includes(tokens);
     #[cfg(debug_assertions)]

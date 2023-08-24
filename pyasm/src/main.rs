@@ -1,64 +1,15 @@
 #[macro_use] extern crate fallthrough;
 use std::{process::Command, str, fs::File, io::Read, collections::HashMap};
 
+mod instructions;
+use instructions::Commands;
+
 use clap::{App, Arg};
 
 mod lexer;
 mod parser;
 mod generator;
 mod simulator;
-
-macro_rules! command_enum {
-    ($($variant:ident),*) => {
-        #[derive(Debug)]
-        #[derive(PartialEq)]
-        #[derive(Clone)]
-        pub enum Commands {
-            $($variant),*
-        }
-
-        impl std::fmt::Display for Commands {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-                match self {
-                    $(Commands::$variant => write!(f, stringify!($variant))),*
-                }
-            }
-        }
-    };
-}
-
-command_enum!(
-    Push, 
-    Dump, 
-    Add, 
-    Dup, 
-    If,
-    Else,
-    EndIf, 
-    Sub, 
-    While, 
-    EndWhile, 
-    G,
-    L,
-    E,
-    Ne,
-    Ge,
-    Le,
-    PrintStringConst, // temporary
-    Syscall,
-    Mul,
-    Mem,
-    Read,
-    Write,
-    Swap,
-    Drop,
-    Over,
-    Rot,
-    Func,
-    EndFunc,
-    Unknown,
-    Div
-);
 
 // TODO : debug mode
 fn main() -> std::io::Result<()> {
@@ -159,7 +110,7 @@ fn main() -> std::io::Result<()> {
         return Ok(());
     }
 
-    // run the program as if it was a binary
+    // run the program
     if matches.contains_id("run") {
         let output = Command::new("./output/output")
             .output()

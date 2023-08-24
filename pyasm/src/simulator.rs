@@ -2,16 +2,24 @@ use crate::Commands;
 
 pub fn simulate(commands: Vec<(Commands, Vec<String>)>) -> u8 {
 
-    let mut stack: Vec<u8> = vec![];
+    let mut stack: Vec<u64> = vec![];
     let mut index: usize = 0;
+
+    let mut skip_stack: Vec<(bool, String)> = vec![];
 
     // TODO : finish simulating mode
     while index < commands.len() {
         let command = commands[index].0.clone();
         let args: Vec<String> = commands[index].1.clone();
+        if skip_stack.last().unwrap_or(&(false, "".to_string())).0 && !(command == Commands::Else || command == Commands::EndIf) {
+            index += 1;
+            continue;
+        }
+        #[cfg(debug_assertions)]
+        println!("{} {:?}", command, skip_stack);
         match (command, args) {
             (Commands::Push, args) => {
-                stack.push(args[0].parse::<u8>().unwrap());
+                stack.push(args[0].parse::<u64>().unwrap());
             },
             (Commands::Dump, _) => {
                 println!("{:?}", stack.pop().unwrap());
@@ -31,14 +39,25 @@ pub fn simulate(commands: Vec<(Commands, Vec<String>)>) -> u8 {
                 stack.push(last);
                 stack.push(last);
             },
-            (Commands::If, _) => {
-
+            (Commands::If, args) => {
+                skip_stack.push((stack.pop().unwrap() == 0, args[0].clone()));
             },
-            (Commands::EndIf, _) => {
-
+            (Commands::EndIf, args) => {
+                let (should_run, number) = skip_stack.pop().unwrap();
+                if number != args[0] {
+                    skip_stack.push((should_run, number));
+                    index += 1;
+                    continue;
+                }
             },
-            (Commands::Else, _) => {
-
+            (Commands::Else, args) => {
+                let (should_run, number) = skip_stack.pop().unwrap();
+                if number != args[0] {
+                    skip_stack.push((should_run, number));
+                    index += 1;
+                    continue;
+                }
+                skip_stack.push((!should_run, number));
             }
             (Commands::While, _) => {
 
@@ -49,32 +68,32 @@ pub fn simulate(commands: Vec<(Commands, Vec<String>)>) -> u8 {
             (Commands::G, _) => {
                 let a = stack.pop().unwrap();
                 let b = stack.pop().unwrap();
-                stack.push((a > b) as u8);
+                stack.push((a < b) as u64);
             }
             (Commands::L, _) => {
                 let a = stack.pop().unwrap();
                 let b = stack.pop().unwrap();
-                stack.push((a < b) as u8);
+                stack.push((a > b) as u64);
             }
             (Commands::E, _) => {
                 let a = stack.pop().unwrap();
                 let b = stack.pop().unwrap();
-                stack.push((a == b) as u8);
+                stack.push((a == b) as u64);
             }
             (Commands::Ne, _) => {
                 let a = stack.pop().unwrap();
                 let b = stack.pop().unwrap();
-                stack.push((a != b) as u8);
+                stack.push((a != b) as u64);
             }
             (Commands::Ge, _) => {
                 let a = stack.pop().unwrap();
                 let b = stack.pop().unwrap();
-                stack.push((a >= b) as u8);
+                stack.push((a <= b) as u64);
             }
             (Commands::Le, _) => {
                 let a = stack.pop().unwrap();
                 let b = stack.pop().unwrap();
-                stack.push((a <= b) as u8);
+                stack.push((a >= b) as u64);
             },
             (Commands::PrintStringConst, _) => {
 
@@ -97,13 +116,20 @@ pub fn simulate(commands: Vec<(Commands, Vec<String>)>) -> u8 {
 
             },
             (Commands::Swap, _) => {
-
+                let a = stack.pop().unwrap();
+                let b = stack.pop().unwrap();
+                stack.push(a);
+                stack.push(b);
             },
             (Commands::Drop, _) => {
-
+                let _ = stack.pop().unwrap();
             },
             (Commands::Over, _) => {
-
+                let a = stack.pop().unwrap();
+                let b = stack.pop().unwrap();
+                stack.push(b);
+                stack.push(a);
+                stack.push(b);
             },
             (Commands::Rot, _) => {
 
@@ -121,8 +147,8 @@ pub fn simulate(commands: Vec<(Commands, Vec<String>)>) -> u8 {
                 let a = stack.pop().unwrap();
                 let b = stack.pop().unwrap();
                 // divmod
-                stack.push(a / b);
                 stack.push(a % b);
+                stack.push(a / b);
             },
         }
         index += 1;

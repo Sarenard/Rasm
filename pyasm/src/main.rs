@@ -128,6 +128,8 @@ fn main() -> std::io::Result<()> {
     let commands: Vec<(Commands, Vec<String>)> = parser::tok_to_commands(macros_tokens);
     #[cfg(debug_assertions)]
     println!("commands: {:?}", commands);
+
+    // TODO : type/stack simulation to check for errors
     
     // TODO : error system
     // TODO : memory allocator
@@ -136,7 +138,7 @@ fn main() -> std::io::Result<()> {
     }
     else if matches.contains_id("simulate") {
         let error_code = simulator::simulate(commands);
-        println!("output code: {}", error_code);
+        std::process::exit(error_code as i32);
     }
 
     let nasm_output = Command::new("nasm")

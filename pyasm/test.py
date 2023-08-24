@@ -31,12 +31,13 @@ if args.record:
         print(colored(f"Recorded {dossier}", "green"))
     print(colored("Recorded all tests !", "cyan"))
     
+# TODO : add simulating to tests
+# TODO : handle errors
+# TODO : handle infinite loop
 if args.test:
-    # TODO : add simulating to tests
-    # TODO : handle errors
-    # TODO : handle infinite loop
+    # compile mode
     if args.record:print()
-    print(colored("Testing...", "cyan"))
+    print(colored("Testing compiled mode...", "cyan"))
     for dossier in os.listdir("tests"):
         print(colored(f"Testing {dossier}", "white"))
         subprocess.run(["./target/release/rasm", "-f", f"tests/{dossier}/{dossier}.pyasm", "-c"])
@@ -56,4 +57,26 @@ if args.test:
             got_error = True
         if not got_error:
             print(colored(f"Test {dossier} passed", "green"))
-    print(colored("Ran all tests !", "cyan"))
+    print(colored("Ran all tests in compile mode !\n", "cyan"))
+    # sim mode
+    if args.record:print()
+    print(colored("Testing simulated mode...", "cyan"))
+    for dossier in os.listdir("tests"):
+        print(colored(f"Testing {dossier}", "white"))
+        output = subprocess.run(["./target/release/rasm", "-f", f"tests/{dossier}/{dossier}.pyasm", "-s"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        got_error = False
+        if output.returncode != int(open(f"tests/{dossier}/out/{dossier}.return", "r").read()):
+            print(colored(f"Test {dossier} failed on return code", "red"))
+            print("Should be", open(f"tests/{dossier}/out/{dossier}.return", "r").read(), "but is", output.returncode)
+            got_error = True
+        if output.stdout != open(f"tests/{dossier}/out/{dossier}.stdout", "rb").read():
+            print(colored(f"Test {dossier} failed on stdout", "red"))
+            print("Should be", open(f"tests/{dossier}/out/{dossier}.stdout", "rb").read(), "but is", output.stdout)
+            got_error = True
+        if output.stderr != open(f"tests/{dossier}/out/{dossier}.stderr", "rb").read():
+            print(colored(f"Test {dossier} failed on stderr", "red"))
+            print("Should be", open(f"tests/{dossier}/out/{dossier}.stderr", "rb").read(), "but is", output.stderr)
+            got_error = True
+        if not got_error:
+            print(colored(f"Test {dossier} passed", "green"))
+    print(colored("Ran all tests in sim mode !", "cyan"))

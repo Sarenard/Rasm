@@ -10,12 +10,14 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
     let mut mess_nb: u64 = 0;
     let mut states: VecDeque<(Commands, u64)> = VecDeque::new();
     let mut in_func_def: bool = false;
+    let mut if_nb_stack: Vec<u64> = Vec::new();
 
     for token in tokens {
         if token == "end" {
             match states.pop_back() {
                 Some((Commands::If, nb)) => {
                     commands.push((Commands::EndIf, [nb.to_string()].to_vec()));
+                    if_nb_stack.pop();
                 },
                 Some((Commands::While, nb)) => {
                     commands.push((Commands::EndWhile, [nb.to_string()].to_vec()));
@@ -46,6 +48,7 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
         else if token == "if" {
             commands.push((Commands::If, vec![unique_nb.to_string()]));
             states.push_back((Commands::If, unique_nb));
+            if_nb_stack.push(unique_nb);
             unique_nb += 1;
         }
         else if token == "while" {
@@ -54,7 +57,9 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
             unique_nb += 1;
         }
         else if token == "else" {
-            commands.push((Commands::Else, vec![unique_nb.to_string()]));
+            let last = if_nb_stack.pop().unwrap().to_string();
+            if_nb_stack.push(last.clone().parse::<u64>().unwrap());
+            commands.push((Commands::Else, vec![last]));
         }
         else if token == "func" {
             in_func_def = true;

@@ -11,7 +11,7 @@ pub fn simulate(commands: Vec<(Commands, Vec<String>)>) -> u8 {
     while index < commands.len() {
         let command = commands[index].0.clone();
         let args: Vec<String> = commands[index].1.clone();
-        if skip_stack.last().unwrap_or(&(false, "".to_string())).0 && !(command == Commands::Else || command == Commands::EndIf) {
+        if skip_stack.last().unwrap_or(&(false, "".to_string())).0 && !matches!(command, Commands::Else | Commands::EndIf)  {
             index += 1;
             continue;
         }
@@ -60,10 +60,10 @@ pub fn simulate(commands: Vec<(Commands, Vec<String>)>) -> u8 {
                 skip_stack.push((!should_run, number));
             }
             (Commands::While, _) => {
-
+                todo!();
             },
             (Commands::EndWhile, _) => {
-
+                todo!();
             }
             (Commands::G, _) => {
                 let a = stack.pop().unwrap();
@@ -96,10 +96,10 @@ pub fn simulate(commands: Vec<(Commands, Vec<String>)>) -> u8 {
                 stack.push((a >= b) as u64);
             },
             (Commands::PrintStringConst, _) => {
-
+                todo!();
             },
             (Commands::Syscall, _) => {
-
+                todo!();
             },
             (Commands::Mul, _) => {
                 let a = stack.pop().unwrap();
@@ -107,13 +107,13 @@ pub fn simulate(commands: Vec<(Commands, Vec<String>)>) -> u8 {
                 stack.push(a * b);
             },
             (Commands::Mem, _) => {
-
+                todo!();
             },
             (Commands::Read, _) => {
-
+                todo!();
             },
             (Commands::Write, _) => {
-
+                todo!();
             },
             (Commands::Swap, _) => {
                 let a = stack.pop().unwrap();
@@ -132,16 +132,16 @@ pub fn simulate(commands: Vec<(Commands, Vec<String>)>) -> u8 {
                 stack.push(b);
             },
             (Commands::Rot, _) => {
-
+                todo!();
             },
             (Commands::Func, _) => {
-
+                todo!();
             },
             (Commands::EndFunc, _) => {
-
+                todo!();
             },
             (Commands::Unknown, _) => {
-                
+                todo!();
             },
             (Commands::Div, _) => {
                 let a = stack.pop().unwrap();

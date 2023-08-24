@@ -1,6 +1,11 @@
 use crate::Commands;
+use crate::instructions::Settings;
+use crate::instructions::Setting;
 
-pub fn simulate(commands: Vec<(Commands, Vec<String>)>) -> u8 {
+pub fn simulate(commands: Vec<(Commands, Vec<String>)>, settings: Settings) -> u8 {
+
+    let _memory_size: u64 = settings.get_value(Setting::MemorySize);
+    let _function_depth_limit: u64 = settings.get_value(Setting::FunctionDepthLimit);
 
     let mut stack: Vec<u64> = vec![];
     let mut index: usize = 0;

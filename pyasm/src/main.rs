@@ -3,6 +3,8 @@ use std::{process::Command, str, fs::File, io::Read, collections::HashMap};
 
 mod instructions;
 use instructions::Commands;
+use instructions::Settings;
+use instructions::Setting;
 
 use clap::{App, Arg};
 
@@ -53,6 +55,10 @@ fn main() -> std::io::Result<()> {
         )
         .get_matches();
 
+    let mut settings = Settings::new();
+    settings.add_setting(Setting::MemorySize, 1000);
+    settings.add_setting(Setting::FunctionDepthLimit, 10);
+
     let input_name = matches.value_of("input").unwrap();
 
     let mut input_file = File::open(input_name)?;
@@ -85,10 +91,10 @@ fn main() -> std::io::Result<()> {
     // TODO : error system
     // TODO : memory allocator
     if matches.contains_id("compile") {
-        generator::make_asm(commands).expect("failed to make asm");
+        generator::make_asm(commands, settings).expect("failed to make asm");
     }
     else if matches.contains_id("simulate") {
-        let error_code = simulator::simulate(commands);
+        let error_code = simulator::simulate(commands, settings);
         std::process::exit(error_code as i32);
     }
 

@@ -5,13 +5,15 @@ use std::io::Write;
 use crate::Commands;
 use crate::parser;
 
-pub fn make_asm(commands: Vec<(Commands, Vec<String>)>) -> std::io::Result<()> {
+use crate::instructions::Settings;
+use crate::instructions::Setting;
+
+pub fn make_asm(commands: Vec<(Commands, Vec<String>)>, settings: Settings) -> std::io::Result<()> {
     let mut file = File::create("output/output.asm")?;
     let mut program = String::new();
 
-    // TODO : put this in the main file to share with simulator
-    const MEMORY_SIZE: i32 = 1000;
-    const FUNCTION_DEPTH_LIMIT: i32 = 10;
+    let memory_size: u64 = settings.get_value(Setting::MemorySize);
+    let function_depth_limit: u64 = settings.get_value(Setting::FunctionDepthLimit);
 
     let functions: HashMap<String, String> = commands.iter()
     .filter_map(|x| {
@@ -52,11 +54,11 @@ pub fn make_asm(commands: Vec<(Commands, Vec<String>)>) -> std::io::Result<()> {
     program.push_str("section .bss\n");
     program.push_str(format!(
         "  mem: resb {}\n", 
-        MEMORY_SIZE
+        memory_size
     ).as_str());
     program.push_str(format!(
         "  func_space: resb {}\n", 
-        FUNCTION_DEPTH_LIMIT * 8
+        function_depth_limit * 8
     ).as_str());
     program.push_str("\n");
 

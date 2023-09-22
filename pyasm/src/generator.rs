@@ -25,20 +25,25 @@ pub fn make_asm(commands: Vec<(Commands, Vec<String>)>, settings: Settings) -> s
     })
     .collect();
 
+    let mut used_functions: Vec<String> = commands.iter()
+    .filter_map(|x| {
+        if x.0 == Commands::Unknown {
+            Some(x.1[0].clone())
+        } else {
+            None
+        }
+    })
+    .collect();
+    let mut used_functions_seen: HashMap<String, bool> = HashMap::new();
+    used_functions.retain(|x| used_functions_seen.insert(x.to_string(), true).is_none());
+    // TODO : dont compile not used functions
+
     #[cfg(debug_assertions)]
     println!("functions: {:?}", functions);
+    #[cfg(debug_assertions)]
+    println!("used_functions: {:?}", used_functions);
 
     program.push_str("section .data\n");
-    program.push_str("  ; constants\n");
-    program.push_str("  NULL            equ 0\n");
-    program.push_str("  EXIT_SUCCESS    equ 0\n");
-    program.push_str("  EXIT_FAIL       equ 1\n");
-    program.push_str("  SYS_exit        equ 60\n");
-    program.push_str("  SYS_read        equ 0\n");
-    program.push_str("  SYS_write       equ 1\n");
-    program.push_str("  STD_in          equ 0\n");
-    program.push_str("  STD_out         equ 1\n");
-    program.push_str("  STD_err         equ 2\n\n");
 
     program.push_str("  REC_OVERFLOW_MSG db 'Recursion overflow', 10, '', 0\n");
     program.push_str("  REC_OVERFLOW_MSG_LEN equ $ - REC_OVERFLOW_MSG\n\n");
@@ -104,9 +109,18 @@ pub fn make_asm(commands: Vec<(Commands, Vec<String>)>, settings: Settings) -> s
 
     let mut if_stack: Vec<(String, bool)> = vec![];
 
-    // TODO : dont compile not used functions
+    // we remove True and False from the list
+
     for command in commands {
         match (command.0, command.1) {
+            (Commands::True, _) => {
+                program.push_str("  ; push true\n");
+                program.push_str("  push 1\n\n");
+            }
+            (Commands::False, _) => {
+                program.push_str("  ; push false\n");
+                program.push_str("  push 0\n\n");
+            }
             (Commands::Push, args) => {
                 program.push_str(format!(
                     "  ; push {}\n", 
@@ -411,8 +425,8 @@ pub fn make_asm(commands: Vec<(Commands, Vec<String>)>, settings: Settings) -> s
     
     // exit
     program.push_str("  ; we end the program and return 0\n");
-    program.push_str("  mov rax, SYS_exit\n");
-    program.push_str("  mov rdi, EXIT_SUCCESS\n");
+    program.push_str("  mov rax, 60\n");
+    program.push_str("  mov rdi, 0\n");
     program.push_str("  syscall\n\n");
 
     program.push_str("RECURSION_LIMIT:\n");
@@ -424,8 +438,8 @@ pub fn make_asm(commands: Vec<(Commands, Vec<String>)>, settings: Settings) -> s
     program.push_str("  syscall\n\n");
     program.push_str("  ; exit\n");
     program.push_str("  pop rax\n");
-    program.push_str("  mov rax, SYS_exit\n");
-    program.push_str("  mov rdi, EXIT_FAIL\n");
+    program.push_str("  mov rax, 60\n");
+    program.push_str("  mov rdi, 1\n");
     program.push_str("  syscall\n");
 
     file.write_all(program.as_bytes())?;

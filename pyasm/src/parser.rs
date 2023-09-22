@@ -151,6 +151,12 @@ pub fn tok_to_commands(tokens: Vec<String>) -> Vec<(Commands, Vec<String>)> {
         else if token == "divmod" {
             commands.push((Commands::Div, vec![]));
         }
+        else if token == "true" {
+            commands.push((Commands::True, vec![]));
+        }
+        else if token == "false" {
+            commands.push((Commands::False, vec![]));
+        }
         else {
             if in_func_def {
                 in_func_def = false;

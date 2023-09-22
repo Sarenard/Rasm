@@ -155,6 +155,12 @@ pub fn simulate(commands: Vec<(Commands, Vec<String>)>, settings: Settings) -> u
                 stack.push(a % b);
                 stack.push(a / b);
             },
+            (Commands::True, _) => {
+                stack.push(1);
+            },
+            (Commands::False, _) => {
+                stack.push(1);
+            }
         }
         index += 1;
     }

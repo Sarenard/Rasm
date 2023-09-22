@@ -127,6 +127,30 @@ stack.push(dividende)
 stack.push(reste)
 ```
 
+### `true`
+
+Ajoute true sur la stack (est push par les if/conditions)
+
+```dart
+true .
+```
+
+```py
+stack.push(True)
+```
+
+### `false`
+
+Ajoute false sur la stack (est push par les if/conditions)
+
+```dart
+false .
+```
+
+```py
+stack.push(False)
+```
+
 ## Inspirations et remerciments
 
 - [Porth](https://gitlab.com/tsoding/porth) Pour l'idée d'un language compilé en assembleur

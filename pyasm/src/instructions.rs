@@ -47,7 +47,9 @@ command_enum!(
     Func,
     EndFunc,
     Unknown,
-    Div
+    Div,
+    True,
+    False
 );
 
 #[derive(PartialEq)]

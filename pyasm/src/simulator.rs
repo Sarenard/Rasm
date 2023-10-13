@@ -159,7 +159,7 @@ pub fn simulate(commands: Vec<(Commands, Vec<String>)>, settings: Settings) -> u
                 stack.push(1);
             },
             (Commands::False, _) => {
-                stack.push(1);
+                stack.push(0);
             }
         }
         index += 1;
